@@ -1,17 +1,152 @@
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>EduLab - Virtual Science Lab</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f0f8;
+      margin: 0;
+      padding: 20px;
+    }
 
-const loader = new THREE.GLTFLoader();
-loader.load('beaker.glb', function(gltf) {
-  scene.add(gltf.scene);
-});
+    .experiment-btn {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
 
-camera.position.z = 5;
-function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-}
-animate();
+    canvas {
+      border: 1px solid #000;
+      margin: 20px auto;
+      display: block;
+      background-color: #fff;
+    }
+
+    #controlBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+
+    .info-pin {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: red;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .info-box {
+      display: none;
+      position: absolute;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 8px;
+      width: 300px;
+      z-index: 10;
+      text-align: left;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    model-viewer {
+      width: 100%;
+      height: 500px;
+    }
+  </style>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+</head>
+<body>
+  <div id="homePage">
+    <h1>EduLab: Virtual Science Experiments</h1>
+    <p>Select an experiment:</p>
+    <button class="experiment-btn" onclick="startExperiment('titration')">Titration</button>
+    <button class="experiment-btn" disabled>Projectile Motion</button>
+    <button class="experiment-btn" disabled>Acid-Base Neutralization</button>
+    <button class="experiment-btn" disabled>Electric Circuits</button>
+  </div>
+
+  <div id="experimentPage" style="display:none; position: relative;">
+    <h2 id="experimentTitle">Titration Simulation</h2>
+
+    <model-viewer src="/mnt/data/burette.glb" alt="Burette" auto-rotate camera-controls></model-viewer>
+    <model-viewer src="/mnt/data/conical_flask.glb" alt="Conical Flask" auto-rotate camera-controls></model-viewer>
+
+    <button id="controlBtn" onclick="addDrop()">Add Drop</button>
+    <p id="resultText"></p>
+    <button onclick="goHome()">Back to Experiments</button>
+
+    <div class="info-pin" onclick="toggleInfoBox()" style="top: 140px; left: 500px;"></div>
+    <div class="info-box" id="infoBox">
+      <strong>Titration Experiment</strong>
+      <p><strong>Type:</strong> Acid-Base Reaction</p>
+      <p><strong>Purpose:</strong> Determine concentration of an unknown base by neutralizing it with a known acid.</p>
+      <p><strong>Equipment:</strong> Burette, Flask, Indicator, Acid/Base solutions</p>
+      <p><strong>Steps:</strong>
+        <ol>
+          <li>Fill burette with known acid.</li>
+          <li>Place unknown base in flask with indicator.</li>
+          <li>Slowly release acid drop by drop.</li>
+          <li>Stop when solution turns color (neutralization).</li>
+        </ol>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    let dropsAdded = 0;
+    let lastClickTime = 0;
+
+    function startExperiment(type) {
+      document.getElementById('homePage').style.display = 'none';
+      document.getElementById('experimentPage').style.display = 'block';
+    }
+
+    function goHome() {
+      document.getElementById('experimentPage').style.display = 'none';
+      document.getElementById('homePage').style.display = 'block';
+      dropsAdded = 0;
+      document.getElementById('resultText').textContent = '';
+      document.getElementById('infoBox').style.display = 'none';
+    }
+
+    function toggleInfoBox() {
+      const box = document.getElementById('infoBox');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function addDrop() {
+      const currentTime = new Date().getTime();
+      const timeDiff = currentTime - lastClickTime;
+      lastClickTime = currentTime;
+
+      if (timeDiff < 800) {
+        document.getElementById('resultText').textContent = "Too fast! You messed up the titration.";
+        return;
+      }
+
+      dropsAdded++;
+
+      if (dropsAdded > 8 && dropsAdded <= 10) {
+        document.getElementById('resultText').textContent = "Perfect! The base is neutralized.";
+      } else if (dropsAdded > 10) {
+        document.getElementById('resultText').textContent = "Too much acid! You've gone past neutralization.";
+      } else {
+        document.getElementById('resultText').textContent = `Drop ${dropsAdded}: Keep going...`;
+      }
+    }
+  </script>
+</body>
+</html>
