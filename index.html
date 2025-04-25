@@ -41,14 +41,33 @@
       text-decoration: none;
       color: inherit;
     }
+    model-viewer {
+      width: 400px;
+      height: 300px;
+      margin: 20px auto;
+    }
+    .button-link {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #4285f4;
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 16px;
+    }
+    .button-link:hover {
+      background-color: #3367d6;
+    }
   </style>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
   <h1>Welcome to EduLab</h1>
   <p>Select an experiment to begin exploring virtual science labs!</p>
 
   <div class="experiment-grid">
-    <a href="titration2d.html">
+    <a href="titration3d.html">
       <div class="experiment">
         <img src="https://cdn-icons-png.flaticon.com/512/2907/2907055.png" width="60" height="60" alt="Titration Icon">
         <h3>Titration</h3>
