@@ -27,6 +27,7 @@
       border: 1px solid #000;
       margin: 20px auto;
       display: block;
+      background-color: #fff;
     }
 
     #controlBtn {
@@ -48,7 +49,7 @@
 
   <div id="experimentPage" style="display:none;">
     <h2 id="experimentTitle">Titration Simulation</h2>
-    <canvas id="titrationCanvas" width="600" height="400"></canvas>
+    <canvas id="titrationCanvas" width="600" height="500"></canvas>
     <button id="controlBtn" onclick="addDrop()">Add Drop</button>
     <p id="resultText"></p>
     <button onclick="goHome()">Back to Experiments</button>
@@ -81,7 +82,6 @@
       const timeDiff = currentTime - lastClickTime;
       lastClickTime = currentTime;
 
-      // Require 1 second between presses (1000 ms)
       if (timeDiff < 800) {
         document.getElementById('resultText').textContent = "Too fast! You messed up the titration.";
         return;
@@ -92,14 +92,36 @@
     }
 
     function drawExperiment(drops) {
-      ctx.clearRect(0, 0, 600, 400);
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(250, 100, 100, 200);
+      ctx.clearRect(0, 0, 600, 500);
 
-      const solutionHeight = Math.min(drops * 5, 200);
+      // Draw burette (tube with chemical)
+      ctx.fillStyle = '#555';
+      ctx.fillRect(295, 20, 10, 150); // Tube body
+      ctx.fillStyle = '#4CAF50';
+      ctx.fillRect(295, 20, 10, Math.min(drops * 10, 150)); // Chemical level
+
+      // Draw flask (round bottom)
+      ctx.beginPath();
+      ctx.arc(300, 400, 60, 0, Math.PI, true);
+      ctx.lineTo(240, 400);
+      ctx.lineTo(240, 440);
+      ctx.lineTo(360, 440);
+      ctx.lineTo(360, 400);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Draw neck of flask
+      ctx.beginPath();
+      ctx.moveTo(280, 320);
+      ctx.lineTo(280, 380);
+      ctx.moveTo(320, 320);
+      ctx.lineTo(320, 380);
+      ctx.stroke();
+
+      // Fill flask with solution based on drops
+      const fillHeight = Math.min(drops * 5, 60);
       ctx.fillStyle = drops > 10 ? '#ff5c5c' : drops > 8 ? '#7fff7f' : '#a2d5f2';
-      ctx.fillRect(250, 300 - solutionHeight, 100, solutionHeight);
+      ctx.fillRect(241, 440 - fillHeight, 118, fillHeight);
 
       if (drops > 8 && drops <= 10) {
         document.getElementById('resultText').textContent = "Perfect! The base is neutralized.";
