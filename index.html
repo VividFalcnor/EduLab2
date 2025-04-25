@@ -1,10 +1,11 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>EduLab - Virtual Science Experiments</title>
   <style>
-    body { background-color: #eef3fb; font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    body { background-color: #ffffe0; font-family: Arial, sans-serif; text-align: center; padding: 20px; }
     .experiment-grid { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin-top: 30px; }
     .experiment { width: 200px; height: 180px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px; cursor: pointer; transition: transform 0.3s ease; }
     .experiment:hover { transform: scale(1.05); }
@@ -12,100 +13,100 @@
     .experiment h3 { margin: 5px 0; }
     .experiment p { margin: 0; color: #666; }
     a { text-decoration: none; color: inherit; }
-    #titrationSection { display: none; }
-    model-viewer { width: 45%; height: 300px; margin: 10px auto; background-color: #fff; display: inline-block; }
-    #titrationCanvas { border: 1px solid #ccc; background-color: #fff; margin-top: 20px; }
-    .bar-container { width: 400px; height: 20px; background-color: #ddd; margin: 20px auto; position: relative; }
-    .bar { height: 100%; width: 0; background-color: #76c7c0; transition: width 0.1s; }
-    .target-zone { position: absolute; height: 100%; background-color: rgba(255,215,0,0.5); left: 40%; width: 20%; pointer-events: none; }
-    #status { font-size: 18px; margin-top: 10px; }
-    #infoBox { font-size: 14px; color: #333; margin-bottom: 20px; }
-    button { margin: 10px; padding: 10px 20px; font-size: 16px; border: none; border-radius: 6px; background-color: #4285f4; color: #fff; cursor: pointer; }
-    #logo { width: 120px; display: block; margin: 0 auto 20px; }
+    #experimentMenu img.brand-logo { max-height: 60px; margin-bottom: 20px; }
+    .hidden { display: none; }
   </style>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
-  <img src="Brand Logo.png" width="606" height="370" onerror="this.src='fallback.png'">
-  <img id="logo" src="Brand Logo" alt="Brand Logo" onerror="this.style.display='none'">
-  <h1>Welcome to EduLab</h1>
-  <p>Select an experiment to explore:</p>
-  <div class="experiment-grid" id="experimentMenu">
-    <div class="experiment" onclick="startTitration()">
-      <img src="Titration.png" alt="Titration" width="60" height="60" onerror="this.src='fallback.png'">
-      <h3>Titration</h3>
-    </div>
-    <div class="experiment">
-      <img src="Projectile Motion.png" alt="Projectile Motion" width="60" height="60" onerror="this.src='fallback.png'">
-      <h3>Projectile Motion</h3>
-      <p>Coming Soon</p>
-    </div>
-    <div class="experiment">
-      <img src="Acid Base.png" alt="Acid Base" width="60" height="60" onerror="this.src='fallback.png'">
-      <h3>Acid Base</h3>
-      <p>Coming Soon</p>
-    </div>
-    <div class="experiment">
-      <img src="Electrolysis.png" alt="Electrolysis" width="60" height="60" onerror="this.src='fallback.png'">
-      <h3>Electrolysis</h3>
-      <p>Coming Soon</p>
+  <img src="Brand Logo.png" alt="Titration" width="606" height="370">
+  <div id="experimentMenu">
+    <img src="Brand Logo" alt="Brand Logo" class="brand-logo">
+    <h1>Welcome to EduLab</h1>
+    <p>Select an experiment to explore:</p>
+    <div class="experiment-grid">
+      <div class="experiment" onclick="startTitration()">
+        <img src="Titration.png" alt="Titration" width="60" height="60">
+        <h3>Titration</h3>
+      </div>
+      <div class="experiment">
+        <img src="Projectile Motion.png" alt="Projectile Motion" width="60" height="60">
+        <h3>Projectile Motion</h3>
+        <p>Coming Soon</p>
+      </div>
+      <div class="experiment">
+        <img src="Acid Base.png" alt="Acid Base" width="60" height="60">
+        <h3>Acid Base</h3>
+        <p>Coming Soon</p>
+      </div>
+      <div class="experiment">
+        <img src="Electrolysis.png" alt="Electrolysis" width="60" height="60">
+        <h3>Electrolysis</h3>
+        <p>Coming Soon</p>
+      </div>
     </div>
   </div>
 
-  <div id="titrationSection">
+  <div id="titrationSection" class="hidden">
     <h1>Titration Experiment</h1>
-    <div>
-      <model-viewer src="burette.glb" alt="3D Burette" camera-controls auto-rotate></model-viewer>
-      <model-viewer src="conical_flask.glb" alt="3D Flask" camera-controls auto-rotate></model-viewer>
+    <div style="display: flex; justify-content: center; gap: 20px;">
+      <model-viewer src="burette.glb" alt="3D Burette" camera-controls auto-rotate style="width: 300px; height: 300px;"></model-viewer>
+      <model-viewer src="conical_flask.glb" alt="3D Flask" camera-controls auto-rotate style="width: 300px; height: 300px;"></model-viewer>
     </div>
-    <div id="infoBox">Use SPACE within the yellow zone to add titrant. Hold for 4 seconds to complete.</div>
-    <canvas id="titrationCanvas" width="400" height="300"></canvas>
-    <div class="bar-container">
-      <div id="inputBar" class="bar"></div>
-      <div class="target-zone"></div>
+    <div id="infoBox">Use SPACE within the yellow zone to add titrant. Too fast or slow will fail.</div>
+    <canvas id="titrationCanvas" width="400" height="300" style="border: 1px solid #ccc; background-color: #fff; margin-top: 20px;"></canvas>
+    <div class="bar-container" style="width: 400px; height: 20px; background-color: #ddd; margin: 20px auto; position: relative;">
+      <div id="inputBar" class="bar" style="height: 100%; width: 0; background-color: #76c7c0; transition: width 0.1s;"></div>
+      <div class="target-zone" style="position: absolute; height: 100%; background-color: rgba(255,215,0,0.5); left: 40%; width: 20%; pointer-events: none;"></div>
     </div>
     <p>Hold SPACE to pour within the yellow zone</p>
     <p id="status"></p>
-    <button id="repeatBtn" style="display:none;" onclick="resetExperiment()">Repeat Experiment</button>
-    <button onclick="returnToMenu()">Return to Experiments Menu</button>
+    <button id="repeatBtn" onclick="resetExperiment()" style="display: none; padding: 10px 20px; font-size: 16px; border: none; border-radius: 6px; background-color: #fbbc05; color: #fff; cursor: pointer;">Repeat Experiment</button>
+    <br><br>
+    <button onclick="returnToMenu()" style="padding: 10px 20px; font-size: 16px; border: none; border-radius: 6px; background-color: #34a853; color: #fff; cursor: pointer;">Return to Experiments Menu</button>
   </div>
 
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <script>
-    let canvas = document.getElementById('titrationCanvas');
-    let ctx = canvas.getContext('2d');
-    let inputBar = document.getElementById('inputBar');
-    let status = document.getElementById('status');
-    let flaskLevel = 80, buretteLevel = 100, barValue = 0, isPressing = false, lastAdd = 0, pourDuration = 0, completed = false;
+    const canvas = document.getElementById('titrationCanvas');
+    const ctx = canvas.getContext('2d');
+    const inputBar = document.getElementById('inputBar');
+    const status = document.getElementById('status');
 
-    document.body.addEventListener('keydown', e => { if (e.code==='Space') isPressing = true; });
-    document.body.addEventListener('keyup', e => { if (e.code==='Space') isPressing = false; });
+    let flaskLevel = 80, buretteLevel = 100, barValue = 0;
+    let isPressing = false, lastAdd = 0, pourDuration = 0, completed = false;
+
+    document.body.addEventListener('keydown', e => { if (e.code === 'Space') isPressing = true; });
+    document.body.addEventListener('keyup', e => { if (e.code === 'Space') isPressing = false; });
 
     function draw() {
-      ctx.clearRect(0,0,400,300);
-      ctx.fillStyle = '#000';
+      ctx.clearRect(0, 0, 400, 300);
 
-      // burette stand
-      ctx.fillRect(195, 0, 10, 220);
-      ctx.strokeRect(180,20,40,200);
-      ctx.fillStyle='#f28b82';
-      let bh=(buretteLevel/100)*200;
-      ctx.fillRect(180,20+(200-bh),40,bh);
+      // Burette
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(180, 20, 40, 200);
+      ctx.fillStyle = '#f28b82';
+      const bh = (buretteLevel / 100) * 200;
+      ctx.fillRect(180, 20 + (200 - bh), 40, bh);
 
-      // flask base
+      // Flask
       ctx.beginPath();
-      ctx.moveTo(150,260);
-      ctx.lineTo(170,300);
-      ctx.lineTo(230,300);
-      ctx.lineTo(250,260);
-      ctx.closePath();
+      ctx.moveTo(150, 260);
+      ctx.lineTo(170, 300);
+      ctx.lineTo(230, 300);
+      ctx.lineTo(250, 260);
+      ctx.quadraticCurveTo(200, 240, 150, 260);
       ctx.stroke();
-      ctx.fillStyle = completed ? '#34c759' : '#aecbfa';
-      let fh=(flaskLevel/100)*40;
+
+      if (completed) ctx.fillStyle = '#34a853';
+      else ctx.fillStyle = '#aecbfa';
+
+      const fh = (flaskLevel / 100) * 40;
       ctx.beginPath();
-      ctx.moveTo(170,300);
-      ctx.lineTo(230,300);
-      ctx.lineTo(230,300-fh);
-      ctx.lineTo(170,300-fh);
+      ctx.moveTo(170, 300);
+      ctx.lineTo(230, 300);
+      ctx.lineTo(230, 300 - fh);
+      ctx.lineTo(170, 300 - fh);
       ctx.closePath();
       ctx.fill();
     }
@@ -113,22 +114,24 @@
     function update() {
       if (completed) return;
 
-      barValue = isPressing ? Math.min(100,barValue+1) : Math.max(0,barValue-0.5);
+      barValue = isPressing ? Math.min(100, barValue + 1) : Math.max(0, barValue - 0.5);
       inputBar.style.width = barValue + '%';
 
-      let now = Date.now();
-      if (barValue >= 40 && barValue <= 60 && now - lastAdd > 500) {
+      const now = Date.now();
+      const inTarget = barValue >= 40 && barValue <= 60;
+
+      if (isPressing && inTarget && now - lastAdd > 200) {
         if (buretteLevel > 0 && flaskLevel < 100) {
           buretteLevel -= 2;
           flaskLevel += 2;
           lastAdd = now;
-          pourDuration += 0.5;
+          pourDuration += 0.2;
           status.textContent = 'Titrant added.';
         }
-      } else if (barValue > 60) {
+      } else if (isPressing && barValue > 60) {
         status.textContent = 'Flow too fast! Slow down.';
         pourDuration = 0;
-      } else if (barValue < 40 && isPressing) {
+      } else if (isPressing && barValue < 40) {
         status.textContent = 'Flow too slow. Increase speed.';
         pourDuration = 0;
       }
@@ -136,7 +139,9 @@
       if (pourDuration >= 4) {
         completed = true;
         status.textContent = 'Titration complete!';
+        document.getElementById('repeatBtn').style.display = 'inline-block';
       }
+
       draw();
       requestAnimationFrame(update);
     }
@@ -161,18 +166,9 @@
     }
 
     function returnToMenu() {
-      document.getElementById('experimentMenu').style.display = 'flex';
       document.getElementById('titrationSection').style.display = 'none';
-      resetExperiment();
+      document.getElementById('experimentMenu').style.display = 'block';
     }
-
-    setInterval(() => {
-      if (!completed && pourDuration < 4 && isPressing && (barValue < 40 || barValue > 60)) {
-        document.getElementById('repeatBtn').style.display = 'inline-block';
-        status.textContent = 'Failed! Click repeat to try again.';
-        completed = true;
-      }
-    }, 1000);
   </script>
 </body>
 </html>
