@@ -2,75 +2,113 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>EduLab - Virtual Titration</title>
-  <link rel="stylesheet" href="style.css">
+  <title>EduLab - Virtual Science Lab</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f0f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .experiment-btn {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+
+    canvas {
+      border: 1px solid #000;
+      margin: 20px auto;
+      display: block;
+    }
+
+    #controlBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-  <h1>EduLab: Virtual Titration Experiment</h1>
-  <canvas id="titrationCanvas" width="600" height="400"></canvas>
-  <p>Use the slider to simulate adding acid to the base solution.</p>
-  <input type="range" id="dropSlider" min="0" max="100" step="1">
-  <p id="resultText"></p>
+  <div id="homePage">
+    <h1>EduLab: Virtual Science Experiments</h1>
+    <p>Select an experiment:</p>
+    <button class="experiment-btn" onclick="startExperiment('titration')">Titration</button>
+    <button class="experiment-btn" disabled>Projectile Motion</button>
+    <button class="experiment-btn" disabled>Acid-Base Neutralization</button>
+    <button class="experiment-btn" disabled>Electric Circuits</button>
+  </div>
+
+  <div id="experimentPage" style="display:none;">
+    <h2 id="experimentTitle">Titration Simulation</h2>
+    <canvas id="titrationCanvas" width="600" height="400"></canvas>
+    <button id="controlBtn" onclick="addDrop()">Add Drop</button>
+    <p id="resultText"></p>
+    <button onclick="goHome()">Back to Experiments</button>
+  </div>
 
   <script>
-    const canvas = document.getElementById('titrationCanvas');
-    const ctx = canvas.getContext('2d');
-    const slider = document.getElementById('dropSlider');
-    const resultText = document.getElementById('resultText');
-
     let dropsAdded = 0;
+    let lastClickTime = 0;
+    let ctx = null;
 
-    slider.addEventListener('input', () => {
-      dropsAdded = slider.value;
+    function startExperiment(type) {
+      document.getElementById('homePage').style.display = 'none';
+      document.getElementById('experimentPage').style.display = 'block';
+      if (type === 'titration') {
+        const canvas = document.getElementById('titrationCanvas');
+        ctx = canvas.getContext('2d');
+        drawExperiment(dropsAdded);
+      }
+    }
+
+    function goHome() {
+      document.getElementById('experimentPage').style.display = 'none';
+      document.getElementById('homePage').style.display = 'block';
+      dropsAdded = 0;
+      document.getElementById('resultText').textContent = '';
+    }
+
+    function addDrop() {
+      const currentTime = new Date().getTime();
+      const timeDiff = currentTime - lastClickTime;
+      lastClickTime = currentTime;
+
+      // Require 1 second between presses (1000 ms)
+      if (timeDiff < 800) {
+        document.getElementById('resultText').textContent = "Too fast! You messed up the titration.";
+        return;
+      }
+
+      dropsAdded++;
       drawExperiment(dropsAdded);
-    });
+    }
 
     function drawExperiment(drops) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Draw beaker outline
+      ctx.clearRect(0, 0, 600, 400);
       ctx.strokeStyle = '#000';
       ctx.lineWidth = 2;
       ctx.strokeRect(250, 100, 100, 200);
 
-      // Draw solution
-      const solutionHeight = Math.min(drops * 2, 200);
-      ctx.fillStyle = drops > 70 ? '#ff5c5c' : drops > 60 ? '#7fff7f' : '#a2d5f2';
+      const solutionHeight = Math.min(drops * 5, 200);
+      ctx.fillStyle = drops > 10 ? '#ff5c5c' : drops > 8 ? '#7fff7f' : '#a2d5f2';
       ctx.fillRect(250, 300 - solutionHeight, 100, solutionHeight);
 
-      // Text feedback
-      if (drops > 60 && drops <= 70) {
-        resultText.textContent = "Perfect! The base is neutralized.";
-      } else if (drops > 70) {
-        resultText.textContent = "Too much acid! You've gone past neutralization.";
+      if (drops > 8 && drops <= 10) {
+        document.getElementById('resultText').textContent = "Perfect! The base is neutralized.";
+      } else if (drops > 10) {
+        document.getElementById('resultText').textContent = "Too much acid! You've gone past neutralization.";
       } else {
-        resultText.textContent = "Keep going... you're getting close.";
+        document.getElementById('resultText').textContent = `Drop ${drops}: Keep going...`;
       }
     }
-
-    // Initial draw
-    drawExperiment(0);
   </script>
 </body>
 </html>
-
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #f0f0f8;
-    margin: 0;
-    padding: 20px;
-  }
-
-  canvas {
-    border: 1px solid #000;
-    margin: 20px auto;
-    display: block;
-  }
-
-  input[type="range"] {
-    width: 300px;
-    margin-top: 20px;
-  }
-</style>
