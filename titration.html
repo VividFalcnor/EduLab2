@@ -1,138 +1,73 @@
+
+<!-- titration.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Titration Experiment - EduLab</title>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <title>EduLab - Titration Experiment</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #eef3fb;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    .model-section {
-      margin-top: 40px;
-    }
-    .model-viewer {
-      width: 300px;
-      height: 300px;
-      margin: 10px;
-    }
-    .button-scroll {
-      margin: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
-    }
-    .exp-title {
-      margin-top: 50px;
-      font-size: 28px;
-      font-weight: bold;
-    }
-    #titration2D {
-      margin-top: 40px;
-    }
-    canvas, #barContainer {
-      margin-top: 20px;
-    }
+    body { background-color: #eef3fb; font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    model-viewer { width: 45%; height: 300px; margin: 10px; background-color: #fff; }
+    #titrationCanvas { border: 1px solid #ccc; background-color: #fff; margin-top: 20px; }
+    .bar-container { width: 400px; height: 20px; background-color: #ddd; margin: 20px auto; position: relative; }
+    .bar { height: 100%; width: 0; background-color: #76c7c0; transition: width 0.1s; }
+    .target-zone { position: absolute; height: 100%; background-color: rgba(255,215,0,0.5); left: 40%; width: 20%; pointer-events: none; }
+    #status { font-size: 18px; margin-top: 10px; }
+    #infoBox { font-size: 14px; color: #333; margin-bottom: 20px; }
   </style>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
-  <h1>Titration Equipment Preview</h1>
-  <div class="model-section">
-    <model-viewer src="burette.glb" alt="3D Burette" auto-rotate camera-controls class="model-viewer"></model-viewer>
-    <model-viewer src="conical_flask.glb" alt="3D Conical Flask" auto-rotate camera-controls class="model-viewer"></model-viewer>
+  <h1>Titration Experiment</h1>
+  <!-- 3D preview -->
+  <div>
+    <model-viewer src="burette.glb" alt="3D Burette" camera-controls auto-rotate></model-viewer>
+    <model-viewer src="conical_flask.glb" alt="3D Flask" camera-controls auto-rotate></model-viewer>
   </div>
-
-  <button class="button-scroll" onclick="document.getElementById('titration2D').scrollIntoView({ behavior: 'smooth' })">
-    Run the Experiment
-  </button>
-
-  <div id="titration2D">
-    <h2 class="exp-title">2D Titration Simulation</h2>
-
-    <p><strong>Flask contains:</strong> HCl (Hydrochloric Acid) 🔵</p>
-    <p><strong>Burette contains:</strong> NaOH (Sodium Hydroxide) 🔴</p>
-
-    <canvas id="canvas" width="300" height="300" style="border:1px solid black;"></canvas>
-
-    <div id="barContainer" style="width: 300px; height: 20px; border: 1px solid #333; margin: 20px auto;">
-      <div id="bar" style="height: 100%; width: 0%; background-color: green;"></div>
-    </div>
-
-    <p>Press SPACE to control the flow rate. Stay within the range to proceed!</p>
-    <p id="status"></p>
+  <a href="#2d" style="text-decoration:none;"><button style="margin-top:20px; padding:10px 20px; font-size:16px; border:none; border-radius:6px; background-color:#4285f4; color:#fff; cursor:pointer;">Scroll Down to Run the Experiment</button></a>
+  <div id="infoBox">Use SPACE within the yellow zone to add titrant. Too fast or slow will fail.</div>
+  <!-- 2D simulation -->
+  <h2 id="2d">2D Simulation</h2>
+  <canvas id="titrationCanvas" width="400" height="300"></canvas>
+  <div class="bar-container">
+    <div id="inputBar" class="bar"></div>
+    <div class="target-zone"></div>
   </div>
+  <p>Hold SPACE to pour within the yellow zone</p>
+  <p id="status"></p>
 
   <script>
-    const canvas = document.getElementById('canvas');
+    const canvas = document.getElementById('titrationCanvas');
     const ctx = canvas.getContext('2d');
-    const flask = { x: 120, y: 150, w: 60, h: 100 };
-    const burette = { x: 135, y: 10, w: 30, h: 140 };
-    let dropY = 20;
-    let isDropping = false;
-
-    const bar = document.getElementById('bar');
+    const inputBar = document.getElementById('inputBar');
     const status = document.getElementById('status');
-    let barValue = 0;
+    let flaskLevel = 80, buretteLevel = 100, barValue = 0, isPressing = false, lastAdd = 0;
+
+    document.body.addEventListener('keydown', e => { if (e.code==='Space') isPressing = true; });
+    document.body.addEventListener('keyup', e => { if (e.code==='Space') isPressing = false; });
 
     function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Draw burette
-      ctx.fillStyle = 'red';
-      ctx.fillRect(burette.x, burette.y, burette.w, burette.h);
-
-      // Draw flask
-      ctx.fillStyle = 'blue';
-      ctx.beginPath();
-      ctx.moveTo(flask.x, flask.y);
-      ctx.lineTo(flask.x + flask.w, flask.y);
-      ctx.lineTo(flask.x + flask.w - 10, flask.y + flask.h);
-      ctx.lineTo(flask.x + 10, flask.y + flask.h);
-      ctx.closePath();
-      ctx.fill();
-
-      // Droplet
-      if (isDropping) {
-        ctx.beginPath();
-        ctx.arc(burette.x + burette.w / 2, dropY, 5, 0, Math.PI * 2);
-        ctx.fillStyle = 'purple';
-        ctx.fill();
-        dropY += 2;
-        if (dropY > flask.y + 10) {
-          dropY = 20;
-          isDropping = false;
-        }
-      }
-
-      requestAnimationFrame(draw);
+      ctx.clearRect(0,0,400,300);
+      // draw burette
+      ctx.strokeRect(180,20,40,200);
+      ctx.fillStyle='#f28b82';
+      let bh=(buretteLevel/100)*200;
+      ctx.fillRect(180,20+(200-bh),40,bh);
+      // draw flask
+      ctx.beginPath(); ctx.moveTo(150,260); ctx.lineTo(170,300); ctx.lineTo(230,300); ctx.lineTo(250,260); ctx.closePath(); ctx.stroke();
+      ctx.fillStyle='#aecbfa';
+      let fh=(flaskLevel/100)*40;
+      ctx.beginPath(); ctx.moveTo(170,300); ctx.lineTo(230,300); ctx.lineTo(230,300-fh); ctx.lineTo(170,300-fh); ctx.closePath(); ctx.fill();
     }
-
-    draw();
-
-    document.addEventListener('keydown', (e) => {
-      if (e.code === 'Space') {
-        barValue = Math.min(barValue + 2, 100);
-        isDropping = true;
-      }
-    });
-
-    setInterval(() => {
-      barValue = Math.max(barValue - 1, 0);
-      bar.style.width = `${barValue}%`;
-
-      if (barValue > 60 && barValue < 80) {
-        status.textContent = "Titration in progress...";
-        status.style.color = "green";
-      } else if (barValue <= 60) {
-        status.textContent = "Too slow! Try again.";
-        status.style.color = "orange";
-      } else {
-        status.textContent = "Too fast! Titration failed.";
-        status.style.color = "red";
-      }
-    }, 200);
+    function update() {
+      barValue = isPressing? Math.min(100,barValue+1) : Math.max(0,barValue-0.5);
+      inputBar.style.width=barValue+'%';
+      let now=Date.now();
+      if(barValue>=40&&barValue<=60&&now-lastAdd>500){ if(buretteLevel>0&&flaskLevel<100){ buretteLevel-=2; flaskLevel+=2; lastAdd=now; status.textContent='Titrant added.';} }
+      if(barValue>60) status.textContent='Flow too fast! Slow down.';
+      else if(barValue<40) status.textContent='Flow too slow. Increase speed.';
+      draw(); requestAnimationFrame(update);
+    }
+    draw(); update();
   </script>
 </body>
-</html>
