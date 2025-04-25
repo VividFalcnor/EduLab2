@@ -2,46 +2,64 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>EduLab - Titration 3D Preview</title>
+  <title>EduLab - Virtual Science Experiments</title>
   <style>
     body {
       background-color: #eef3fb;
       font-family: Arial, sans-serif;
       text-align: center;
-      margin: 0;
       padding: 20px;
     }
-    h1 {
-      margin-bottom: 20px;
-    }
-    model-viewer {
-      width: 45%;
-      height: 300px;
-      margin: 10px;
-      background-color: #fff;
-    }
-    #runBtn {
+    .experiment-grid {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
       margin-top: 30px;
-      padding: 12px 24px;
-      font-size: 18px;
-      background-color: #4285f4;
-      color: white;
-      border: none;
-      border-radius: 6px;
+    }
+    .experiment {
+      width: 200px;
+      height: 180px;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
       cursor: pointer;
+      transition: transform 0.3s ease;
     }
-    #runBtn:hover {
-      background-color: #3367d6;
-    }
+    .experiment:hover { transform: scale(1.05); }
+    .experiment img { margin-bottom: 10px; }
+    .experiment h3 { margin: 5px 0; }
+    a { text-decoration: none; color: inherit; }
   </style>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
-  <h1>Titration Experiment Preview</h1>
-  <div>
-    <model-viewer src="burette.glb" alt="3D Burette Model" auto-rotate camera-controls ar></model-viewer>
-    <model-viewer src="conical_flask.glb" alt="3D Conical Flask Model" auto-rotate camera-controls ar></model-viewer>
+  <h1>Welcome to EduLab</h1>
+  <p>Select an experiment to explore:</p>
+
+  <div class="experiment-grid">
+    <a href="titration3d.html">
+      <div class="experiment">
+        <img src="titration.png" alt="Titration" width="60" height="60">
+        <h3>Titration</h3>
+      </div>
+    </a>
+    <div class="experiment">
+      <img src="projectile_motion.png" alt="Projectile Motion" width="60" height="60">
+      <h3>Projectile Motion</h3>
+    </div>
+    <div class="experiment">
+      <img src="acid_base.png" alt="Acid Base" width="60" height="60">
+      <h3>Acid Base</h3>
+    </div>
+    <div class="experiment">
+      <img src="electrolysis.png" alt="Electrolysis" width="60" height="60">
+      <h3>Electrolysis</h3>
+    </div>
   </div>
-  <a href="titration2d.html"><button id="runBtn">Run the Experiment</button></a>
 </body>
 </html>
