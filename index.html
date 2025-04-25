@@ -21,6 +21,7 @@
   <img src="Brand Logo.png" alt="Titration" width="606" height="370">
   <div id="experimentMenu">
     <h1>Welcome to EduLab</h1>
+      <h2>No Equipment? No Problem.</h2>
     <p>Select an experiment to explore:</p>
     <div class="experiment-grid">
       <div class="experiment" onclick="startTitration()">
@@ -87,16 +88,28 @@
       ctx.fillStyle='#f28b82';
       let bh=(buretteLevel/100)*200;
       ctx.fillRect(180,20+(200-bh),40,bh);
+      ctx.lineWidth = 2;
+      const bh = (buretteLevel / 100) * 200;
+      ctx.fillRect(180, 20 + (200 - bh), 40, bh);
 
       if (completed) ctx.fillStyle = '#34a853';
       else ctx.fillStyle = '#aecbfa';
 
-      const fh = (flaskLevel / 100) * 40;
+      // flask base
       ctx.beginPath();
-      ctx.moveTo(170, 300);
-      ctx.lineTo(230, 300);
-      ctx.lineTo(230, 300 - fh);
-      ctx.lineTo(170, 300 - fh);
+      ctx.moveTo(150,260);
+      ctx.lineTo(170,300);
+      ctx.lineTo(230,300);
+      ctx.lineTo(250,260);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fillStyle = completed ? '#34c759' : '#aecbfa';
+      let fh=(flaskLevel/100)*40;
+      ctx.beginPath();
+      ctx.moveTo(170,300);
+      ctx.lineTo(230,300);
+      ctx.lineTo(230,300-fh);
+      ctx.lineTo(170,300-fh);
       ctx.closePath();
       ctx.fill();
     }
