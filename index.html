@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <title>EduLab - Virtual Science Experiments</title>
   <style>
-    body { background-color: #ffffe0; font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    body { background-color: #ffffe0; font-family: Trebuchet MS, sans-serif; text-align: center; padding: 20px; }
     .experiment-grid { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin-top: 30px; }
     .experiment { width: 200px; height: 180px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px; cursor: pointer; transition: transform 0.3s ease; }
     .experiment:hover { transform: scale(1.05); }
@@ -79,24 +79,15 @@
     document.body.addEventListener('keyup', e => { if (e.code === 'Space') isPressing = false; });
 
     function draw() {
-      ctx.clearRect(0, 0, 400, 300);
+      ctx.clearRect(0,0,400,300);
+      ctx.fillStyle = '#000';
 
-      // Burette
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(180, 20, 40, 200);
-      ctx.fillStyle = '#f28b82';
-      const bh = (buretteLevel / 100) * 200;
-      ctx.fillRect(180, 20 + (200 - bh), 40, bh);
-
-      // Flask
-      ctx.beginPath();
-      ctx.moveTo(150, 260);
-      ctx.lineTo(170, 300);
-      ctx.lineTo(230, 300);
-      ctx.lineTo(250, 260);
-      ctx.quadraticCurveTo(200, 240, 150, 260);
-      ctx.stroke();
+      // burette stand
+      ctx.fillRect(195, 0, 10, 220);
+      ctx.strokeRect(180,20,40,200);
+      ctx.fillStyle='#f28b82';
+      let bh=(buretteLevel/100)*200;
+      ctx.fillRect(180,20+(200-bh),40,bh);
 
       if (completed) ctx.fillStyle = '#34a853';
       else ctx.fillStyle = '#aecbfa';
