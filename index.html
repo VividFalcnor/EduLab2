@@ -11,160 +11,167 @@
     .experiment img { margin-bottom: 10px; }
     .experiment h3 { margin: 5px 0; }
     .experiment p { margin: 0; color: #666; }
-    .hidden { display: none; }
-    model-viewer { width: 45%; height: 300px; background-color: #fff; margin: 0 10px; }
-    #titrationCanvas { border: 1px solid #ccc; background-color: #fff; margin: 20px auto; display: block; }
+    a { text-decoration: none; color: inherit; }
+    #titrationSection { display: none; }
+    model-viewer { width: 45%; height: 300px; margin: 10px auto; background-color: #fff; display: inline-block; }
+    #titrationCanvas { border: 1px solid #ccc; background-color: #fff; margin-top: 20px; }
     .bar-container { width: 400px; height: 20px; background-color: #ddd; margin: 20px auto; position: relative; }
     .bar { height: 100%; width: 0; background-color: #76c7c0; transition: width 0.1s; }
     .target-zone { position: absolute; height: 100%; background-color: rgba(255,215,0,0.5); left: 40%; width: 20%; pointer-events: none; }
     #status { font-size: 18px; margin-top: 10px; }
-    #infoBox { font-size: 14px; color: #333; margin: 20px 0; }
-    .labels { margin: 10px 0; font-size: 14px; }
-    .center-3d { display: flex; justify-content: center; align-items: center; margin-top: 20px; }
-    .button { margin: 10px; padding: 10px 20px; font-size: 16px; border: none; border-radius: 6px; background-color: #4285f4; color: #fff; cursor: pointer; }
+    #infoBox { font-size: 14px; color: #333; margin-bottom: 20px; }
+    button { margin: 10px; padding: 10px 20px; font-size: 16px; border: none; border-radius: 6px; background-color: #4285f4; color: #fff; cursor: pointer; }
+    #logo { width: 120px; display: block; margin: 0 auto 20px; }
   </style>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
+  <img id="logo" src="Brand Logo" alt="Brand Logo" onerror="this.style.display='none'">
   <h1>Welcome to EduLab</h1>
   <p>Select an experiment to explore:</p>
-  <div class="experiment-grid">
-    <div class="experiment" onclick="showTitration()">
-      <img src="Titration.png" alt="Titration" width="60" height="60" onerror="this.src='fallback.png';">
+  <div class="experiment-grid" id="experimentMenu">
+    <div class="experiment" onclick="startTitration()">
+      <img src="Titration.png" alt="Titration" width="60" height="60" onerror="this.src='fallback.png'">
       <h3>Titration</h3>
-      <p>Click to explore</p>
     </div>
     <div class="experiment">
-      <img src="Projectile_Motion.png" alt="Projectile Motion" width="60" height="60" onerror="this.src='fallback.png';">
+      <img src="Projectile Motion.png" alt="Projectile Motion" width="60" height="60" onerror="this.src='fallback.png'">
       <h3>Projectile Motion</h3>
       <p>Coming Soon</p>
     </div>
     <div class="experiment">
-      <img src="Acid_Base.png" alt="Acid Base" width="60" height="60" onerror="this.src='fallback.png';">
+      <img src="Acid Base.png" alt="Acid Base" width="60" height="60" onerror="this.src='fallback.png'">
       <h3>Acid Base</h3>
       <p>Coming Soon</p>
     </div>
     <div class="experiment">
-      <img src="Electrolysis.png" alt="Electrolysis" width="60" height="60" onerror="this.src='fallback.png';">
+      <img src="Electrolysis.png" alt="Electrolysis" width="60" height="60" onerror="this.src='fallback.png'">
       <h3>Electrolysis</h3>
       <p>Coming Soon</p>
     </div>
   </div>
 
-  <div id="titrationSection" class="hidden">
-    <h2>Titration Experiment</h2>
-    <div class="center-3d">
+  <div id="titrationSection">
+    <h1>Titration Experiment</h1>
+    <div>
       <model-viewer src="burette.glb" alt="3D Burette" camera-controls auto-rotate></model-viewer>
       <model-viewer src="conical_flask.glb" alt="3D Flask" camera-controls auto-rotate></model-viewer>
     </div>
-    <div class="labels">Burette (HCl solution) | Flask (NaOH with indicator)</div>
-    <div id="infoBox">Use SPACE within the yellow zone for 5–8s to titrate. Hold too long = failure.</div>
+    <div id="infoBox">Use SPACE within the yellow zone to add titrant. Hold for 4 seconds to complete.</div>
     <canvas id="titrationCanvas" width="400" height="300"></canvas>
     <div class="bar-container">
       <div id="inputBar" class="bar"></div>
       <div class="target-zone"></div>
     </div>
+    <p>Hold SPACE to pour within the yellow zone</p>
     <p id="status"></p>
-    <button id="retryBtn" class="button hidden" onclick="resetExperiment()">Repeat Experiment</button>
+    <button id="repeatBtn" style="display:none;" onclick="resetExperiment()">Repeat Experiment</button>
+    <button onclick="returnToMenu()">Return to Experiments Menu</button>
   </div>
 
   <script>
-    const titrationSection = document.getElementById('titrationSection');
-    const canvas = document.getElementById('titrationCanvas');
-    const ctx = canvas.getContext('2d');
-    const inputBar = document.getElementById('inputBar');
-    const status = document.getElementById('status');
-    const retryBtn = document.getElementById('retryBtn');
+    let canvas = document.getElementById('titrationCanvas');
+    let ctx = canvas.getContext('2d');
+    let inputBar = document.getElementById('inputBar');
+    let status = document.getElementById('status');
+    let flaskLevel = 80, buretteLevel = 100, barValue = 0, isPressing = false, lastAdd = 0, pourDuration = 0, completed = false;
 
-    let flaskLevel, buretteLevel, barValue, isPressing, lastAdd, holdTime, flaskColor, experimentDone;
+    document.body.addEventListener('keydown', e => { if (e.code==='Space') isPressing = true; });
+    document.body.addEventListener('keyup', e => { if (e.code==='Space') isPressing = false; });
 
-    function showTitration() {
-      titrationSection.classList.remove('hidden');
-      document.querySelector('.experiment-grid').classList.add('hidden');
-      resetExperiment();
+    function draw() {
+      ctx.clearRect(0,0,400,300);
+      ctx.fillStyle = '#000';
+
+      // burette stand
+      ctx.fillRect(195, 0, 10, 220);
+      ctx.strokeRect(180,20,40,200);
+      ctx.fillStyle='#f28b82';
+      let bh=(buretteLevel/100)*200;
+      ctx.fillRect(180,20+(200-bh),40,bh);
+
+      // flask base
+      ctx.beginPath();
+      ctx.moveTo(150,260);
+      ctx.lineTo(170,300);
+      ctx.lineTo(230,300);
+      ctx.lineTo(250,260);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fillStyle = completed ? '#34c759' : '#aecbfa';
+      let fh=(flaskLevel/100)*40;
+      ctx.beginPath();
+      ctx.moveTo(170,300);
+      ctx.lineTo(230,300);
+      ctx.lineTo(230,300-fh);
+      ctx.lineTo(170,300-fh);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function update() {
+      if (completed) return;
+
+      barValue = isPressing ? Math.min(100,barValue+1) : Math.max(0,barValue-0.5);
+      inputBar.style.width = barValue + '%';
+
+      let now = Date.now();
+      if (barValue >= 40 && barValue <= 60 && now - lastAdd > 500) {
+        if (buretteLevel > 0 && flaskLevel < 100) {
+          buretteLevel -= 2;
+          flaskLevel += 2;
+          lastAdd = now;
+          pourDuration += 0.5;
+          status.textContent = 'Titrant added.';
+        }
+      } else if (barValue > 60) {
+        status.textContent = 'Flow too fast! Slow down.';
+        pourDuration = 0;
+      } else if (barValue < 40 && isPressing) {
+        status.textContent = 'Flow too slow. Increase speed.';
+        pourDuration = 0;
+      }
+
+      if (pourDuration >= 4) {
+        completed = true;
+        status.textContent = 'Titration complete!';
+      }
+      draw();
+      requestAnimationFrame(update);
+    }
+
+    function startTitration() {
+      document.getElementById('experimentMenu').style.display = 'none';
+      document.getElementById('titrationSection').style.display = 'block';
+      draw();
+      update();
     }
 
     function resetExperiment() {
       flaskLevel = 80;
       buretteLevel = 100;
       barValue = 0;
-      isPressing = false;
-      lastAdd = 0;
-      holdTime = 0;
-      flaskColor = '#aecbfa';
-      experimentDone = false;
-      retryBtn.classList.add('hidden');
+      pourDuration = 0;
+      completed = false;
       status.textContent = '';
+      document.getElementById('repeatBtn').style.display = 'none';
       draw();
+      update();
     }
 
-    document.body.addEventListener('keydown', e => {
-      if (e.code === 'Space') isPressing = true;
-    });
-
-    document.body.addEventListener('keyup', e => {
-      if (e.code === 'Space') isPressing = false;
-    });
-
-    function draw() {
-      ctx.clearRect(0, 0, 400, 300);
-
-      // draw burette
-      ctx.fillStyle = '#555';
-      ctx.fillRect(190, 20, 20, 200);
-      ctx.fillStyle = '#f28b82';
-      let bh = (buretteLevel / 100) * 200;
-      ctx.fillRect(190, 20 + (200 - bh), 20, bh);
-
-      // draw flask
-      ctx.strokeStyle = '#000';
-      ctx.beginPath();
-      ctx.moveTo(160, 260); ctx.lineTo(180, 300); ctx.lineTo(220, 300); ctx.lineTo(240, 260);
-      ctx.quadraticCurveTo(200, 240, 160, 260);
-      ctx.stroke();
-      let fh = (flaskLevel / 100) * 40;
-      ctx.fillStyle = flaskColor;
-      ctx.beginPath();
-      ctx.moveTo(180, 300); ctx.lineTo(220, 300); ctx.lineTo(220, 300 - fh); ctx.lineTo(180, 300 - fh); ctx.closePath();
-      ctx.fill();
+    function returnToMenu() {
+      document.getElementById('experimentMenu').style.display = 'flex';
+      document.getElementById('titrationSection').style.display = 'none';
+      resetExperiment();
     }
 
-    function update() {
-      if (experimentDone) return;
-
-      barValue = isPressing ? Math.min(100, barValue + 1) : Math.max(0, barValue - 0.5);
-      inputBar.style.width = barValue + '%';
-      const now = Date.now();
-
-      if (barValue >= 40 && barValue <= 60 && now - lastAdd > 100) {
-        if (buretteLevel > 0 && flaskLevel < 100) {
-          buretteLevel -= 0.5;
-          flaskLevel += 0.5;
-          holdTime += 0.1;
-          lastAdd = now;
-        }
-        status.textContent = `Holding... ${holdTime.toFixed(1)}s`;
-        if (holdTime >= 5 && holdTime <= 8) {
-          flaskColor = '#dab6f7';
-          status.textContent = 'Titration successful! Endpoint reached.';
-          experimentDone = true;
-        } else if (holdTime > 8) {
-          flaskColor = '#6a0dad';
-          status.textContent = 'Titration failed. Overshot endpoint.';
-          retryBtn.classList.remove('hidden');
-          experimentDone = true;
-        }
-      } else if (barValue > 60) {
-        status.textContent = 'Flow too fast! Slow down.';
-      } else if (barValue < 40) {
-        status.textContent = 'Flow too slow. Increase speed.';
+    setInterval(() => {
+      if (!completed && pourDuration < 4 && isPressing && (barValue < 40 || barValue > 60)) {
+        document.getElementById('repeatBtn').style.display = 'inline-block';
+        status.textContent = 'Failed! Click repeat to try again.';
+        completed = true;
       }
-      draw();
-      requestAnimationFrame(update);
-    }
-
-    draw();
-    update();
+    }, 1000);
   </script>
 </body>
 </html>
