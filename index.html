@@ -2,147 +2,74 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>EduLab - Virtual Science Lab</title>
+  <title>EduLab - Virtual Science Experiments</title>
   <style>
     body {
+      background-color: #eef3fb;
       font-family: Arial, sans-serif;
       text-align: center;
-      background-color: #f0f0f8;
-      margin: 0;
       padding: 20px;
     }
-
-    .experiment-btn {
-      padding: 10px 20px;
-      margin: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      background-color: #4CAF50;
-      color: white;
-      cursor: pointer;
+    .experiment-grid {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 30px;
     }
-
-    #controlBtn {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin-top: 20px;
-    }
-
-    .info-pin {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      background-color: red;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-
-    .info-box {
-      display: none;
-      position: absolute;
-      top: 100px;
-      left: 50%;
-      transform: translateX(-50%);
+    .experiment {
+      width: 220px;
+      height: 150px;
       background-color: #ffffff;
-      border: 1px solid #ccc;
-      padding: 15px;
-      border-radius: 8px;
-      width: 300px;
-      z-index: 10;
-      text-align: left;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
     }
-
-    model-viewer {
-      width: 45%;
-      height: 400px;
-      margin: 10px;
+    .experiment:hover {
+      transform: scale(1.05);
+    }
+    .experiment h3 {
+      margin: 10px 0 0;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
     }
   </style>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
-  <div id="homePage">
-    <h1>EduLab: Virtual Science Experiments</h1>
-    <p>Select an experiment:</p>
-    <button class="experiment-btn" onclick="startExperiment('titration')">Titration</button>
-    <button class="experiment-btn" disabled>Projectile Motion</button>
-    <button class="experiment-btn" disabled>Acid-Base Neutralization</button>
-    <button class="experiment-btn" disabled>Electric Circuits</button>
-  </div>
+  <h1>Welcome to EduLab</h1>
+  <p>Select an experiment to begin exploring virtual science labs!</p>
 
-  <div id="experimentPage" style="display:none; position: relative;">
-    <h2 id="experimentTitle">Titration Simulation</h2>
-
-    <div style="display: flex; justify-content: center; flex-wrap: wrap;">
-      <model-viewer id="buretteModel" src="burette.glb" alt="Burette" camera-controls></model-viewer>
-      <model-viewer id="flaskModel" src="conical_flask.glb" alt="Conical Flask" camera-controls></model-viewer>
+  <div class="experiment-grid">
+    <a href="titration2d.html">
+      <div class="experiment">
+        <img src="https://cdn-icons-png.flaticon.com/512/2907/2907055.png" width="60" height="60" alt="Titration Icon">
+        <h3>Titration</h3>
+        <p>Acid-base neutralization</p>
+      </div>
+    </a>
+    <div class="experiment">
+      <img src="https://cdn-icons-png.flaticon.com/512/1041/1041916.png" width="60" height="60" alt="Experiment Icon">
+      <h3>Projectile Motion</h3>
+      <p>Coming Soon</p>
     </div>
-
-    <button id="controlBtn" onclick="addDrop()">Add Drop</button>
-    <p id="resultText"></p>
-    <button onclick="goHome()">Back to Experiments</button>
-
-    <div class="info-pin" onclick="toggleInfoBox()" style="top: 140px; left: 500px;"></div>
-    <div class="info-box" id="infoBox">
-      <strong>Titration Experiment</strong>
-      <p><strong>Type:</strong> Acid-Base Reaction</p>
-      <p><strong>Purpose:</strong> Determine concentration of an unknown base by neutralizing it with a known acid.</p>
-      <p><strong>Equipment:</strong> Burette, Flask, Indicator, Acid/Base solutions</p>
-      <p><strong>Steps:</strong>
-        <ol>
-          <li>Fill burette with known acid.</li>
-          <li>Place unknown base in flask with indicator.</li>
-          <li>Slowly release acid drop by drop.</li>
-          <li>Stop when solution turns color (neutralization).</li>
-        </ol>
-      </p>
+    <div class="experiment">
+      <img src="https://cdn-icons-png.flaticon.com/512/2907/2907076.png" width="60" height="60" alt="Experiment Icon">
+      <h3>Acid-Base Reactions</h3>
+      <p>Coming Soon</p>
+    </div>
+    <div class="experiment">
+      <img src="https://cdn-icons-png.flaticon.com/512/9356/9356492.png" width="60" height="60" alt="Experiment Icon">
+      <h3>Electrolysis</h3>
+      <p>Coming Soon</p>
     </div>
   </div>
-
-  <script>
-    let dropsAdded = 0;
-    let lastClickTime = 0;
-
-    function startExperiment(type) {
-      document.getElementById('homePage').style.display = 'none';
-      document.getElementById('experimentPage').style.display = 'block';
-    }
-
-    function goHome() {
-      document.getElementById('experimentPage').style.display = 'none';
-      document.getElementById('homePage').style.display = 'block';
-      dropsAdded = 0;
-      document.getElementById('resultText').textContent = '';
-      document.getElementById('infoBox').style.display = 'none';
-    }
-
-    function toggleInfoBox() {
-      const box = document.getElementById('infoBox');
-      box.style.display = box.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function addDrop() {
-      const currentTime = new Date().getTime();
-      const timeDiff = currentTime - lastClickTime;
-      lastClickTime = currentTime;
-
-      if (timeDiff < 800) {
-        document.getElementById('resultText').textContent = "Too fast! You messed up the titration.";
-        return;
-      }
-
-      dropsAdded++;
-
-      if (dropsAdded > 8 && dropsAdded <= 10) {
-        document.getElementById('resultText').textContent = "Perfect! The base is neutralized.";
-      } else if (dropsAdded > 10) {
-        document.getElementById('resultText').textContent = "Too much acid! You've gone past neutralization.";
-      } else {
-        document.getElementById('resultText').textContent = `Drop ${dropsAdded}: Keep going...`;
-      }
-    }
-  </script>
 </body>
 </html>
