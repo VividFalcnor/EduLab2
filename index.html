@@ -7,20 +7,22 @@
   <link rel="preload" href="burette.glb" as="fetch">
   <link rel="preload" href="conical_flask.glb" as="fetch">
   <style>
-    /* Background Canvas */
     #backgroundCanvas {
       position: fixed;
       top: 0;
       left: 0;
       z-index: -1;
+      opacity: 0.15;
     }
 
     body {
-      background-color: #e2ffdd;
       font-family: "Trebuchet MS", sans-serif;
       text-align: center;
       padding: 20px;
       margin: 0;
+      position: relative;
+      background-color: #e2ffdd;
+    }
     }
     #headerBox {
       background: linear-gradient(145deg, #ffffff 0%, #f0fff0 100%);
@@ -205,7 +207,7 @@
   </div>
 
 <script>
-  // Floating Symbols Animation
+  // Add floating symbols animation (modified for transparency)
   const bgCanvas = document.getElementById('backgroundCanvas');
   const bgCtx = bgCanvas.getContext('2d');
   let width, height;
@@ -219,31 +221,32 @@
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 20; i++) {
     particles.push({
       x: Math.random() * width,
       y: Math.random() * height,
-      speedX: (Math.random() - 0.5) * 0.5,
-      speedY: (Math.random() - 0.5) * 0.5,
-      size: Math.random() * 20 + 20,
+      speedX: (Math.random() - 0.5) * 0.3,
+      speedY: (Math.random() - 0.5) * 0.3,
+      size: Math.random() * 25 + 25,
       symbol: symbols[Math.floor(Math.random() * symbols.length)],
-      opacity: Math.random() * 0.3 + 0.2
+      opacity: Math.random() * 0.2 + 0.1
     });
   }
 
   function animate() {
     bgCtx.clearRect(0, 0, width, height);
-    bgCtx.font = "bold 20px Arial";
+    bgCtx.font = "bold 24px Arial";
     particles.forEach(p => {
       bgCtx.globalAlpha = p.opacity;
-      bgCtx.fillStyle = "#000000";
+      bgCtx.fillStyle = "#2a722a"; // Dark green color
       bgCtx.fillText(p.symbol, p.x, p.y);
       p.x += p.speedX;
       p.y += p.speedY;
-      if (p.x < -50) p.x = width + 50;
-      if (p.x > width + 50) p.x = -50;
-      if (p.y < -50) p.y = height + 50;
-      if (p.y > height + 50) p.y = -50;
+      
+      if (p.x < -100) p.x = width + 100;
+      if (p.x > width + 100) p.x = -100;
+      if (p.y < -100) p.y = height + 100;
+      if (p.y > height + 100) p.y = -100;
     });
     requestAnimationFrame(animate);
   }
