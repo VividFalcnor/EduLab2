@@ -14,7 +14,7 @@
     }
     #logo {
       display: block;
-      margin: 20px auto;
+      margin: 20px auto 0 auto;
       width: 606px;
       max-width: 90%;
       height: auto;
@@ -36,9 +36,7 @@
       box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
       text-align: center;
     }
-    .experiment img {
-      margin-bottom: 10px;
-    }
+    .experiment img { margin-bottom: 10px; }
     button {
       margin-top: 15px;
       padding: 10px 25px;
@@ -57,52 +55,33 @@
       background: linear-gradient(145deg, #3b79d6, #4e9af1);
       transform: scale(1.05);
     }
-    .model-label {
-      font-size: 16px;
-      margin-top: 10px;
-      font-weight: bold;
-    }
+    .model-label { font-size: 16px; margin-top: 10px; font-weight: bold; }
     model-viewer {
-      width: 100%;
-      max-width: 600px;
-      height: 300px;
-      margin: 10px auto;
+      width: 100%; max-width: 600px; height: 300px; margin: 10px auto;
     }
     canvas {
-      background-color: #fff;
-      border: 1px solid #ccc;
-      margin-top: 20px;
-      width: 90%;
-      max-width: 400px;
-      height: auto;
+      background-color: #fff; border: 1px solid #ccc; margin-top: 20px;
+      width: 90%; max-width: 400px; height: auto;
     }
     .bar-container {
-      width: 90%;
-      max-width: 400px;
-      height: 20px;
-      background-color: #ddd;
-      margin: 20px auto;
-      position: relative;
+      width: 90%; max-width: 400px; height: 20px; background-color: #ddd;
+      margin: 20px auto; position: relative;
     }
     .bar { height: 100%; width: 0; background-color: #76c7c0; }
     .target-zone {
-      position: absolute;
-      height: 100%;
-      background-color: rgba(255,215,0,0.5);
+      position: absolute; height: 100%; background-color: rgba(255,215,0,0.5);
       left: 40%; width: 20%; pointer-events: none;
     }
     #status { font-size: 18px; margin-top: 10px; }
     #completionMessage {
-      background-color: #d4edda;
-      border-left: 6px solid #28a745;
-      color: #155724;
-      padding: 10px;
-      margin: 20px auto;
-      width: 90%; max-width: 600px;
-      display: none;
-      border-radius: 5px;
+      background-color: #d4edda; border-left: 6px solid #28a745;
+      color: #155724; padding: 10px; margin: 20px auto;
+      width: 90%; max-width: 600px; display: none; border-radius: 5px;
     }
-    #titrationInfo { display: none; margin-top: 20px; font-size: 15px; padding: 10px; background: #fff3cd; border-left: 6px solid #ffeeba; }
+    #titrationInfo {
+      display: none; margin-top: 20px; font-size: 15px; padding: 10px;
+      background: #fff3cd; border-left: 6px solid #ffeeba;
+    }
     #infoBox, .pin { font-size: 14px; color: #333; margin: 10px; }
     .pin { background: #ffcc00; padding: 5px; border-radius: 4px; display: inline-block; }
     @media (max-width: 768px) {
@@ -117,7 +96,7 @@
 </head>
 <body>
   <img src="Brand Logo.png" id="logo" onerror="this.src='fallback.png'">
-  <h1>EduLab</h1>
+  <h1>EduLab - Virtual Titration</h1>
   <h2>No Equipment? No Problem.</h2>
 
   <div id="experimentMenu">
@@ -143,7 +122,7 @@
     </div>
   </div>
 
-  <div id="titrationSection">
+  <div id="titrationSection" style="display:none;">
     <h2>Titration Experiment</h2>
     <div class="model-label">This is a Burette</div>
     <model-viewer src="burette.glb" alt="3D Burette" auto-rotate camera-controls></model-viewer>
@@ -154,7 +133,7 @@
       <div id="inputBar" class="bar"></div>
       <div class="target-zone"></div>
     </div>
-    <p>Hold SPACE to pour within the yellow zone</p>
+    <p>Hold SPACE (or touch) to pour within the yellow zone</p>
     <p id="status"></p>
     <div id="completionMessage">Congratulations! You've successfully completed the titration experiment.</div>
     <button id="repeatBtn" onclick="resetExperiment()" style="display:none;">Repeat Experiment</button>
@@ -178,8 +157,12 @@
     let flaskLevel = 80, buretteLevel = 100, barValue = 0;
     let isPressing = false, lastTime = null, pourDuration = 0, completed = false;
 
+    // Desktop spacebar
     document.body.addEventListener('keydown', e => { if (e.code === 'Space') isPressing = true; });
     document.body.addEventListener('keyup', e => { if (e.code === 'Space') isPressing = false; });
+    // Mobile touch
+    window.addEventListener('touchstart', () => { isPressing = true; });
+    window.addEventListener('touchend', () => { isPressing = false; });
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -205,7 +188,7 @@
       lastTime = timestamp;
 
       if (!completed) {
-        barValue = isPressing? Math.min(100,barValue+dt*100/1): Math.max(0,barValue-dt*50/1);
+        barValue = isPressing? Math.min(100, barValue + dt*100) : Math.max(0, barValue - dt*50);
         inputBar.style.width = barValue + '%';
 
         if (isPressing && barValue >= 40 && barValue <= 60) {
@@ -215,10 +198,10 @@
           status.textContent = `Pouring... ${pourDuration.toFixed(1)}s`;
         } else if (isPressing) {
           pourDuration = 0;
-          status.textContent = barValue>60? 'Too fast!': 'Too slow!';
+          status.textContent = barValue>60? 'Too fast!':'Too slow!';
         }
 
-        if (pourDuration >= 4) {
+        if (pourDuration >= 3) {
           completed = true;
           status.textContent = 'Titration complete!';
           completionMessage.style.display = 'block';
@@ -238,15 +221,17 @@
     }
 
     function resetExperiment() {
-      flaskLevel=80; buretteLevel=100; barValue=0; pourDuration=0; completed=false;
-      status.textContent=''; completionMessage.style.display='none'; document.getElementById('repeatBtn').style.display='none';
-      lastTime=null;
+      flaskLevel = 80; buretteLevel = 100; barValue = 0; pourDuration = 0; completed = false;
+      status.textContent = '';
+      completionMessage.style.display = 'none';
+      document.getElementById('repeatBtn').style.display = 'none';
+      lastTime = null;
       requestAnimationFrame(update);
     }
 
     function returnToMenu() {
-      document.getElementById('titrationSection').style.display='none';
-      document.getElementById('experimentMenu').style.display='flex';
+      document.getElementById('titrationSection').style.display = 'none';
+      document.getElementById('experimentMenu').style.display = 'flex';
     }
 
     function toggleTitrationInfo() {
