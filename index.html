@@ -4,10 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EduLab - Virtual Titration Experiment</title>
-
-  <!-- Styles for Layout and Responsive Design -->
   <style>
-    /* General styles */
     body {
       background-color: #e2ffdd;
       font-family: "Trebuchet MS", sans-serif;
@@ -15,18 +12,14 @@
       padding: 20px;
       margin: 0;
     }
-
-    /* Header box styling */
     #headerBox {
-      background: linear-gradient(to right, #c2e9fb, #a1c4fd);
+      background: white;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
       display: inline-block;
       margin-top: 20px;
     }
-
-    /* Logo styling */
     #logo {
       display: block;
       margin: 0 auto 10px auto;
@@ -34,45 +27,21 @@
       max-width: 90%;
       height: auto;
     }
-
-    /* Heading animations */
     h1 {
       margin-top: 10px;
       font-size: 32px;
       animation: pulseColor 2s infinite;
     }
-
     @keyframes pulseColor {
       0% { color: #4e9af1; }
       50% { color: #1d4ed8; }
       100% { color: #4e9af1; }
     }
-
-    /* Secondary headings */
     h2 {
       margin-top: 5px;
       color: #555;
       font-size: 18px;
     }
-
-    /* Button styling */
-    button {
-      background: linear-gradient(to right, #4facfe, #00f2fe);
-      border: none;
-      padding: 10px 25px;
-      border-radius: 8px;
-      color: white;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    button:hover {
-      background: linear-gradient(to right, #00f2fe, #4facfe);
-    }
-
-    /* Failure Message Box */
     #failMessage {
       display: none;
       background-color: #f8d7da;
@@ -86,8 +55,6 @@
       opacity: 0;
       transition: opacity 0.5s;
     }
-
-    /* Experiment Menu Styling */
     #experimentMenu {
       margin: 40px auto;
       display: flex;
@@ -95,8 +62,6 @@
       justify-content: center;
       gap: 20px;
     }
-
-    /* Individual experiment box */
     .experiment {
       width: 150px;
       padding: 10px;
@@ -105,24 +70,54 @@
       box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
       text-align: center;
     }
-
-    /* Model viewer, canvas, buttons */
+    .experiment img { margin-bottom: 10px; }
+    button {
+      margin-top: 15px;
+      padding: 10px 25px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #4e9af1, #3b79d6);
+      color: white;
+      cursor: pointer;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+      transition: background 0.3s, transform 0.2s;
+      width: 90%;
+      max-width: 200px;
+    }
+    button:hover {
+      background: linear-gradient(145deg, #3b79d6, #4e9af1);
+      transform: scale(1.05);
+    }
     .model-label { font-size: 16px; margin-top: 10px; font-weight: bold; }
     model-viewer {
       width: 100%; max-width: 600px; height: 300px; margin: 10px auto;
     }
-
     canvas {
       background-color: #fff; border: 1px solid #ccc; margin-top: 20px;
       width: 90%; max-width: 400px; height: auto;
     }
-
-    /* Bar and target zone */
-    .bar-container { width: 90%; max-width: 400px; height: 20px; background-color: #ddd; margin: 20px auto; position: relative; }
+    .bar-container {
+      width: 90%; max-width: 400px; height: 20px; background-color: #ddd;
+      margin: 20px auto; position: relative;
+    }
     .bar { height: 100%; width: 0; background-color: #76c7c0; }
-    .target-zone { position: absolute; height: 100%; background-color: rgba(255,215,0,0.5); left: 40%; width: 20%; pointer-events: none; }
-
-    /* Responsive adjustments */
+    .target-zone {
+      position: absolute; height: 100%; background-color: rgba(255,215,0,0.5);
+      left: 40%; width: 20%; pointer-events: none;
+    }
+    #status { font-size: 18px; margin-top: 10px; }
+    #completionMessage {
+      background-color: #d4edda; border-left: 6px solid #28a745;
+      color: #155724; padding: 10px; margin: 20px auto;
+      width: 90%; max-width: 600px; display: none; border-radius: 5px;
+    }
+    #titrationInfo {
+      display: none; margin-top: 20px; font-size: 15px; padding: 10px;
+      background: #fff3cd; border-left: 6px solid #ffeeba;
+    }
+    #infoBox, .pin { font-size: 14px; color: #333; margin: 10px; }
+    .pin { background: #ffcc00; padding: 5px; border-radius: 4px; display: inline-block; }
     @media (max-width: 768px) {
       #logo { width: 80%; }
       h1 { font-size: 24px; }
@@ -131,23 +126,17 @@
       model-viewer { height: 200px; }
     }
   </style>
-
-  <!-- 3D Model Viewer Import -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
-
-  <!-- HEADER -->
   <div id="headerBox">
     <img src="Brand Logo.png" id="logo" onerror="this.src='fallback.png'">
     <h1>EduLab - Virtual Titration</h1>
-    <h2>Experience hands-on science experiments virtually.</h2>
+    <h2>Experience hands-on science experiments virtually, empowering students anywhere to learn without the need for physical lab equipment.</h2>
   </div>
 
-  <!-- Failure Message Display -->
   <div id="failMessage">⚠️ Pour within the yellow zone! Try again!</div>
 
-  <!-- Experiment Menu -->
   <div id="experimentMenu">
     <div class="experiment">
       <img src="Titration.png" alt="Titration" width="60" height="60" onerror="this.src='fallback.png'">
