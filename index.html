@@ -5,7 +5,7 @@
   <title>EduLab - Virtual Titration Experiment</title>
   <style>
     body {
-      background-color: #eef3fb;
+      background-color: #ffffe0;
       font-family: Trebuchet MS, sans-serif;
       text-align: center;
       padding: 20px;
@@ -124,6 +124,9 @@
 
   <div id="titrationSection">
     <h2>Titration Experiment</h2>
+    <div>
+      <model-viewer src="burette.glb" alt="3D Burette" camera-controls auto-rotate></model-viewer>
+      <model-viewer src="conical_flask.glb" alt="3D Flask" camera-controls auto-rotate></model-viewer>
     <canvas id="titrationCanvas" width="400" height="300"></canvas>
     <div class="bar-container">
       <div id="inputBar" class="bar"></div>
