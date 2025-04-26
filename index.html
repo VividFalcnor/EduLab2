@@ -1,117 +1,114 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>EduLab - Virtual Science Experiments</title>
+  <title>EduLab - Virtual Titration Experiment</title>
   <style>
-    body { background-color: #ffffe0; font-family: Trebuchet MS, sans-serif; text-align: center; padding: 20px; }
-    .experiment-grid { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin-top: 30px; }
-    .experiment { width: 200px; height: 180px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px; cursor: pointer; transition: transform 0.3s ease; }
-    .experiment:hover { transform: scale(1.05); }
-    .experiment img { margin-bottom: 10px; }
-    .experiment h3 { margin: 5px 0; }
-    .experiment p { margin: 0; color: #666; }
-    a { text-decoration: none; color: inherit; }
-    #experimentMenu img.brand-logo { max-height: 60px; margin-bottom: 20px; }
-    .hidden { display: none; }
+    body { background-color: #eef3fb; font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    #experimentMenu { margin-bottom: 30px; }
+    #titrationSection { display: none; }
+    .bar-container { width: 400px; height: 20px; background-color: #ddd; margin: 20px auto; position: relative; }
+    .bar { height: 100%; width: 0; background-color: #76c7c0; transition: width 0.1s; }
+    .target-zone { position: absolute; height: 100%; background-color: rgba(255,215,0,0.5); left: 40%; width: 20%; pointer-events: none; }
+    #status { font-size: 18px; margin-top: 10px; }
+    canvas { background-color: #fff; border: 1px solid #ccc; margin-top: 20px; }
+    button { margin-top: 15px; padding: 10px 20px; font-size: 16px; border: none; border-radius: 6px; background-color: #4285f4; color: #fff; cursor: pointer; }
+    #infoBox, .pin { font-size: 14px; color: #333; margin: 10px; }
+    .pin { background: #ffcc00; padding: 5px; border-radius: 4px; display: inline-block; }
+    #titrationInfo { margin-top: 20px; font-size: 15px; padding: 10px; background: #fff3cd; border-left: 6px solid #ffeeba; display: none; }
+    #logo { position: absolute; top: 10px; left: 10px; height: 50px; }
   </style>
 </head>
 <body>
-  <img src="Brand Logo.png" alt="Titration" width="606" height="370">
+  <img src="Brand Logo.png" width="606" height="370" onerror="this.src='fallback.png'">
+  <h1>EduLab - Virtual Titration</h1>
+  <h2>No Equipment? No Problem.</h2>
+
   <div id="experimentMenu">
-    <h1>Welcome to EduLab</h1>
-      <h2>No Equipment? No Problem.</h2>
     <p>Select an experiment to explore:</p>
-    <div class="experiment-grid">
-      <div class="experiment" onclick="startTitration()">
-        <img src="Titration.png" alt="Titration" width="60" height="60">
-        <h3>Titration</h3>
-      </div>
-      <div class="experiment">
-        <img src="Projectile Motion.png" alt="Projectile Motion" width="60" height="60">
-        <h3>Projectile Motion</h3>
-        <p>Coming Soon</p>
-      </div>
-      <div class="experiment">
-        <img src="Acid Base.png" alt="Acid Base" width="60" height="60">
-        <h3>Acid Base</h3>
-        <p>Coming Soon</p>
-      </div>
-      <div class="experiment">
-        <img src="Electrolysis.png" alt="Electrolysis" width="60" height="60">
-        <h3>Electrolysis</h3>
-        <p>Coming Soon</p>
-      </div>
+    <button onclick="startTitration()">Start Titration Experiment</button>
+      <img src="Titration.png" alt="Titration" width="60" height="60" onerror="this.src='fallback.png'">
+      <h3>Titration</h3>
+    </div>
+    <div class="experiment">
+      <img src="Projectile Motion.png" alt="Projectile Motion" width="60" height="60" onerror="this.src='fallback.png'">
+      <h3>Projectile Motion</h3>
+      <p>Coming Soon</p>
+    </div>
+    <div class="experiment">
+      <img src="Acid Base.png" alt="Acid Base" width="60" height="60" onerror="this.src='fallback.png'">
+      <h3>Acid Base</h3>
+      <p>Coming Soon</p>
+    </div>
+    <div class="experiment">
+      <img src="Electrolysis.png" alt="Electrolysis" width="60" height="60" onerror="this.src='fallback.png'">
+      <h3>Electrolysis</h3>
+      <p>Coming Soon</p>
     </div>
   </div>
+  
 
-  <div id="titrationSection" class="hidden">
-    <h1>Titration Experiment</h1>
-    <div style="display: flex; justify-content: center; gap: 20px;">
-      <model-viewer src="burette.glb" alt="3D Burette" camera-controls auto-rotate style="width: 300px; height: 300px;"></model-viewer>
-      <model-viewer src="conical_flask.glb" alt="3D Flask" camera-controls auto-rotate style="width: 300px; height: 300px;"></model-viewer>
-    </div>
-    <div id="infoBox">Use SPACE within the yellow zone to add titrant. Too fast or slow will fail.</div>
-    <canvas id="titrationCanvas" width="400" height="300" style="border: 1px solid #ccc; background-color: #fff; margin-top: 20px;"></canvas>
-    <div class="bar-container" style="width: 400px; height: 20px; background-color: #ddd; margin: 20px auto; position: relative;">
-      <div id="inputBar" class="bar" style="height: 100%; width: 0; background-color: #76c7c0; transition: width 0.1s;"></div>
-      <div class="target-zone" style="position: absolute; height: 100%; background-color: rgba(255,215,0,0.5); left: 40%; width: 20%; pointer-events: none;"></div>
+  <div id="titrationSection">
+    <h2>Titration Experiment</h2>
+    <canvas id="titrationCanvas" width="400" height="300"></canvas>
+    <div class="bar-container">
+      <div id="inputBar" class="bar"></div>
+      <div class="target-zone"></div>
     </div>
     <p>Hold SPACE to pour within the yellow zone</p>
     <p id="status"></p>
-    <button id="repeatBtn" onclick="resetExperiment()" style="display: none; padding: 10px 20px; font-size: 16px; border: none; border-radius: 6px; background-color: #fbbc05; color: #fff; cursor: pointer;">Repeat Experiment</button>
-    <br><br>
-    <button onclick="returnToMenu()" style="padding: 10px 20px; font-size: 16px; border: none; border-radius: 6px; background-color: #34a853; color: #fff; cursor: pointer;">Return to Experiments Menu</button>
+    <button id="repeatBtn" onclick="resetExperiment()" style="display:none;">Repeat Experiment</button>
+    <button onclick="returnToMenu()">Return to Experiments Menu</button>
+    <button onclick="toggleTitrationInfo()">What is Titration?</button>
+    <div id="titrationInfo">
+      Titration is a technique where a solution of known concentration is used to determine the concentration of an unknown solution. The goal is to identify the exact point where neutralization occurs, often indicated by a color change.
+    </div>
+    <div id="infoBox">
+      <span class="pin">Burette: Contains NaOH (Sodium Hydroxide)</span>
+      <span class="pin">Flask: Contains HCl (Hydrochloric Acid) with indicator</span>
+    </div>
   </div>
 
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <script>
     const canvas = document.getElementById('titrationCanvas');
     const ctx = canvas.getContext('2d');
     const inputBar = document.getElementById('inputBar');
     const status = document.getElementById('status');
-
-    let flaskLevel = 80, buretteLevel = 100, barValue = 0;
-    let isPressing = false, lastAdd = 0, pourDuration = 0, completed = false;
+    let flaskLevel = 80, buretteLevel = 100, barValue = 0, isPressing = false, lastAdd = 0;
+    let pourDuration = 0;
+    let completed = false;
 
     document.body.addEventListener('keydown', e => { if (e.code === 'Space') isPressing = true; });
     document.body.addEventListener('keyup', e => { if (e.code === 'Space') isPressing = false; });
 
     function draw() {
-      ctx.clearRect(0,0,400,300);
-      ctx.fillStyle = '#000';
-
-      // burette stand
-      ctx.fillRect(195, 0, 10, 220);
-      ctx.strokeRect(180,20,40,200);
-      ctx.fillStyle='#f28b82';
-      let bh=(buretteLevel/100)*200;
-      ctx.fillRect(180,20+(200-bh),40,bh);
-      ctx.lineWidth = 2;
+      ctx.clearRect(0, 0, 400, 300);
+      // Draw detailed burette
+      ctx.fillStyle = '#555';
+      ctx.fillRect(180, 10, 40, 210); // outer case
+      ctx.fillStyle = '#f28b82';
       const bh = (buretteLevel / 100) * 200;
-      ctx.fillRect(180, 20 + (200 - bh), 40, bh);
+      ctx.fillRect(185, 15 + (200 - bh), 30, bh); // liquid level
+      ctx.strokeStyle = '#000';
+      ctx.strokeRect(180, 10, 40, 210);
+      ctx.fillStyle = '#000';
+      ctx.fillText("Burette", 170, 8);
 
-      if (completed) ctx.fillStyle = '#34a853';
-      else ctx.fillStyle = '#aecbfa';
-
-      // flask base
+      // Draw detailed flask
       ctx.beginPath();
-      ctx.moveTo(150,260);
-      ctx.lineTo(170,300);
-      ctx.lineTo(230,300);
-      ctx.lineTo(250,260);
-      ctx.closePath();
+      ctx.moveTo(150, 260); ctx.lineTo(170, 300);
+      ctx.lineTo(230, 300); ctx.lineTo(250, 260);
+      ctx.quadraticCurveTo(200, 250, 150, 260);
       ctx.stroke();
-      ctx.fillStyle = completed ? '#34c759' : '#aecbfa';
-      let fh=(flaskLevel/100)*40;
+      ctx.fillStyle = completed ? '#7CFC00' : '#aecbfa';
+      const fh = (flaskLevel / 100) * 40;
       ctx.beginPath();
-      ctx.moveTo(170,300);
-      ctx.lineTo(230,300);
-      ctx.lineTo(230,300-fh);
-      ctx.lineTo(170,300-fh);
+      ctx.moveTo(170, 300); ctx.lineTo(230, 300);
+      ctx.lineTo(230, 300 - fh); ctx.lineTo(170, 300 - fh);
       ctx.closePath();
       ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.fillText("Flask", 190, 290);
     }
 
     function update() {
@@ -121,28 +118,28 @@
       inputBar.style.width = barValue + '%';
 
       const now = Date.now();
-      const inTarget = barValue >= 40 && barValue <= 60;
-
-      if (isPressing && inTarget && now - lastAdd > 200) {
+      if (barValue >= 40 && barValue <= 60 && now - lastAdd > 500) {
         if (buretteLevel > 0 && flaskLevel < 100) {
           buretteLevel -= 2;
           flaskLevel += 2;
           lastAdd = now;
-          pourDuration += 0.2;
+          pourDuration += 0.5;
           status.textContent = 'Titrant added.';
         }
-      } else if (isPressing && barValue > 60) {
+      } else if (barValue > 60 && isPressing) {
         status.textContent = 'Flow too fast! Slow down.';
         pourDuration = 0;
-      } else if (isPressing && barValue < 40) {
+      } else if (barValue < 40 && isPressing) {
         status.textContent = 'Flow too slow. Increase speed.';
         pourDuration = 0;
       }
 
-      if (pourDuration >= 4) {
+      if (pourDuration >= 4 && !completed) {
         completed = true;
         status.textContent = 'Titration complete!';
         document.getElementById('repeatBtn').style.display = 'inline-block';
+        draw();
+        return;
       }
 
       draw();
@@ -171,6 +168,11 @@
     function returnToMenu() {
       document.getElementById('titrationSection').style.display = 'none';
       document.getElementById('experimentMenu').style.display = 'block';
+    }
+
+    function toggleTitrationInfo() {
+      const info = document.getElementById('titrationInfo');
+      info.style.display = info.style.display === 'block' ? 'none' : 'block';
     }
   </script>
 </body>
