@@ -231,12 +231,7 @@
       <img src="Electrolysis.png" alt="Electrolysis" width="60" height="60" onerror="this.src='fallback.png'">
       <h3>Electrolysis</h3>
       <p>Coming Soon</p>
-    </div>
-  </div>
-
-  <div id="titrationSection" style="display:none;">
-    <h2>Titration Experiment</h2>
-    
+    </div>    
     <div class="glass-container">
       <div class="burette">
         <div class="liquid" id="buretteLiquid" style="height: 100%"></div>
@@ -333,28 +328,28 @@
   const inputBar = document.getElementById('inputBar');
   const status = document.getElementById('status');
   const completionMessage = document.getElementById('completionMessage');
+  let flaskLevel = 80, buretteLevel = 100, barValue = 0;
+  let isPressing = false, lastTime = null, pourDuration = 0;
+  let completed = false, failed = false, acidVolume = 25;
   
-  function draw() {
-    ctx.clearRect(0, 0, titrationCanvas.width, titrationCanvas.height);
-
   // Update draw function with new graphics
   function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, titrationCanvas.width, titrationCanvas.height);
     
     // Update liquid levels
-    document.getElementById('buretteLiquid').style.height = `${buretteLevel}%`;
-    const flaskElement = document.getElementById('flaskLiquid');
-    flaskElement.style.height = `${flaskLevel}%`;
+  document.getElementById('buretteLiquid').style.height = `${buretteLevel}%`;
+  const flaskElement = document.getElementById('flaskLiquid');
+  flaskElement.style.height = `${flaskLevel}%`;
     
     // Add color change based on progress
-    if(completed) {
-      flaskElement.style.background = 'rgba(50, 205, 50, 0.6)';
-    } else if(failed) {
-      flaskElement.style.background = 'rgba(255, 99, 71, 0.6)';
-    } else {
-      flaskElement.style.background = 'rgba(135, 206, 250, 0.6)';
-    }
+  if(completed) {
+    flaskElement.style.background = 'rgba(50, 205, 50, 0.6)';
+  } else if(failed) {
+    flaskElement.style.background = 'rgba(255, 99, 71, 0.6)';
+  } else {
+    flaskElement.style.background = 'rgba(135, 206, 250, 0.6)';
   }
+}
 
   function update(timestamp) {
     if (!lastTime) lastTime = timestamp;
