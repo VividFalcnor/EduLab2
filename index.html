@@ -23,6 +23,60 @@
       margin: 0;
       position: relative;
     }
+        /* Add glassware styles */
+    .glass-container {
+      position: relative;
+      margin: 20px auto;
+      width: 300px;
+      height: 400px;
+    }
+    
+    .burette {
+      position: absolute;
+      left: 50%;
+      width: 40px;
+      height: 300px;
+      background: linear-gradient(to right, #f0f0f0 0%, #ffffff 30%, #f0f0f0 100%);
+      border-radius: 8px;
+      transform: translateX(-50%);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .burette-tap {
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      background: #d0d0d0;
+      transform: translateX(-50%);
+      clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%);
+    }
+
+    .flask {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 120px;
+      height: 140px;
+      background: linear-gradient(to right, #f0f0f0 0%, #ffffff 30%, #f0f0f0 100%);
+      border-radius: 40px 40px 80px 80px;
+      transform: translateX(-50%);
+    }
+
+    .liquid {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: rgba(135, 206, 250, 0.6);
+      transition: height 0.3s ease;
+    }
+
+    .target-zone {
+      left: 35% !important;
+      width: 30% !important;
+    }
+    
     #headerBox {
       background: linear-gradient(145deg, #ffffff 0%, #f0fff0 100%);
       padding: 25px;
@@ -142,59 +196,7 @@
       button { font-size: 14px; padding: 8px 20px; }
       model-viewer { height: 200px; }
     }
-        /* Add these new styles */
-    .glass-container {
-      position: relative;
-      margin: 20px auto;
-      width: 300px;
-      height: 400px;
-    }
-    
-    .burette {
-      position: absolute;
-      left: 50%;
-      width: 40px;
-      height: 300px;
-      background: linear-gradient(to right, #f0f0f0 0%, #ffffff 30%, #f0f0f0 100%);
-      border-radius: 8px;
-      transform: translateX(-50%);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
 
-    .burette-tap {
-      position: absolute;
-      bottom: -10px;
-      left: 50%;
-      width: 20px;
-      height: 20px;
-      background: #d0d0d0;
-      transform: translateX(-50%);
-      clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%);
-    }
-
-    .flask {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      width: 120px;
-      height: 140px;
-      background: linear-gradient(to right, #f0f0f0 0%, #ffffff 30%, #f0f0f0 100%);
-      border-radius: 40px 40px 80px 80px;
-      transform: translateX(-50%);
-    }
-
-    .liquid {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      background: rgba(135, 206, 250, 0.6);
-      transition: height 0.3s ease;
-    }
-
-    .target-zone {
-      left: 35% !important;  /* Extended yellow zone */
-      width: 30% !important;
-    }
   </style>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
@@ -234,10 +236,18 @@
 
   <div id="titrationSection" style="display:none;">
     <h2>Titration Experiment</h2>
-    <div class="model-label">This is a Burette</div>
-    <model-viewer src="burette.glb" alt="3D Burette" auto-rotate camera-controls></model-viewer>
-    <div class="model-label">This is a Conical Flask</div>
-    <model-viewer src="conical_flask.glb" alt="3D Conical Flask" auto-rotate camera-controls></model-viewer>
+    
+    <div class="glass-container">
+      <div class="burette">
+        <div class="liquid" id="buretteLiquid" style="height: 100%"></div>
+        <div class="burette-tap"></div>
+      </div>
+      
+      <div class="flask">
+        <div class="liquid" id="flaskLiquid" style="height: 30%"></div>
+      </div>
+    </div>
+
     <canvas id="titrationCanvas" width="400" height="300"></canvas>
     <div class="bar-container">
       <div id="inputBar" class="bar"></div>
@@ -323,14 +333,9 @@
   const inputBar = document.getElementById('inputBar');
   const status = document.getElementById('status');
   const completionMessage = document.getElementById('completionMessage');
-  let flaskLevel = 80, buretteLevel = 100, barValue = 0;
-  let isPressing = false, lastTime = null, pourDuration = 0, completed = false, failed = false;
-  let acidVolume = 25; // mL in flask
-
-  document.body.addEventListener('keydown', e => { if (e.code === 'Space') isPressing = true; });
-  document.body.addEventListener('keyup', e => { if (e.code === 'Space') isPressing = false; });
-  window.addEventListener('touchstart', () => { isPressing = true; });
-  window.addEventListener('touchend', () => { isPressing = false; });
+  
+  function draw() {
+    ctx.clearRect(0, 0, titrationCanvas.width, titrationCanvas.height);
 
   // Update draw function with new graphics
   function draw() {
@@ -338,16 +343,16 @@
     
     // Update liquid levels
     document.getElementById('buretteLiquid').style.height = `${buretteLevel}%`;
-    document.getElementById('flaskLiquid').style.height = `${flaskLevel}%`;
+    const flaskElement = document.getElementById('flaskLiquid');
+    flaskElement.style.height = `${flaskLevel}%`;
     
     // Add color change based on progress
-    const flaskLiquid = document.getElementById('flaskLiquid');
     if(completed) {
-      flaskLiquid.style.background = 'rgba(50, 205, 50, 0.6)'; // Green when complete
+      flaskElement.style.background = 'rgba(50, 205, 50, 0.6)';
     } else if(failed) {
-      flaskLiquid.style.background = 'rgba(255, 99, 71, 0.6)'; // Red when failed
+      flaskElement.style.background = 'rgba(255, 99, 71, 0.6)';
     } else {
-      flaskLiquid.style.background = 'rgba(135, 206, 250, 0.6)'; // Blue default
+      flaskElement.style.background = 'rgba(135, 206, 250, 0.6)';
     }
   }
 
