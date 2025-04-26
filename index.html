@@ -4,7 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EduLab - Virtual Titration Experiment</title>
+  <link rel="preload" href="burette.glb" as="fetch">
+  <link rel="preload" href="conical_flask.glb" as="fetch">
   <style>
+    /* Background Canvas */
+    #backgroundCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
     body {
       background-color: #e2ffdd;
       font-family: "Trebuchet MS", sans-serif;
@@ -92,6 +102,7 @@
     .model-label { font-size: 16px; margin-top: 10px; font-weight: bold; }
     model-viewer {
       width: 100%; max-width: 600px; height: 300px; margin: 10px auto;
+      touch-action: none;
     }
     canvas {
       background-color: #fff; border: 1px solid #ccc; margin-top: 20px;
@@ -129,6 +140,8 @@
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
+  <canvas id="backgroundCanvas"></canvas>
+
   <div id="headerBox">
     <img src="Brand Logo.png" id="logo" onerror="this.src='fallback.png'">
     <h1>EduLab - Virtual Titration</h1>
@@ -187,25 +200,16 @@
   </div>
 
 <script>
-  const canvas = document.getElementById('titrationCanvas');
-  const ctx = canvas.getContext('2d');
-  const inputBar = document.getElementById('inputBar');
-  const status = document.getElementById('status');
-  const completionMessage = document.getElementById('completionMessage');
-  let flaskLevel = 80, buretteLevel = 100, barValue = 0;
-  let isPressing = false, lastTime = null, pourDuration = 0, completed = false, failed = false;
-  </div>
-
   // Floating Symbols Animation
-  const canvas = document.getElementById('backgroundCanvas');
-  const ctx = canvas.getContext('2d');
+  const bgCanvas = document.getElementById('backgroundCanvas');
+  const bgCtx = bgCanvas.getContext('2d');
   let width, height;
   const symbols = ['H₂O', 'NaCl', 'CO₂', 'H⁺', 'OH⁻', 'O₂', 'N₂', 'CH₄'];
   const particles = [];
 
   function resizeCanvas() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
+    width = bgCanvas.width = window.innerWidth;
+    height = bgCanvas.height = window.innerHeight;
   }
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
@@ -223,12 +227,12 @@
   }
 
   function animate() {
-    ctx.clearRect(0, 0, width, height);
-    ctx.font = "bold 20px Arial";
+    bgCtx.clearRect(0, 0, width, height);
+    bgCtx.font = "bold 20px Arial";
     particles.forEach(p => {
-      ctx.globalAlpha = p.opacity;
-      ctx.fillStyle = "#000000";
-      ctx.fillText(p.symbol, p.x, p.y);
+      bgCtx.globalAlpha = p.opacity;
+      bgCtx.fillStyle = "#000000";
+      bgCtx.fillText(p.symbol, p.x, p.y);
       p.x += p.speedX;
       p.y += p.speedY;
       if (p.x < -50) p.x = width + 50;
@@ -239,19 +243,24 @@
     requestAnimationFrame(animate);
   }
   animate();
-  
-  const knownConcentration = 0.1; // Known concentration (Molarity) of NaOH
-  const totalVolume = 50; // Assume burette initially has 50mL
 
-  // Desktop spacebar
+  // Titration Experiment Logic
+  const titrationCanvas = document.getElementById('titrationCanvas');
+  const ctx = titrationCanvas.getContext('2d');
+  const inputBar = document.getElementById('inputBar');
+  const status = document.getElementById('status');
+  const completionMessage = document.getElementById('completionMessage');
+  let flaskLevel = 80, buretteLevel = 100, barValue = 0;
+  let isPressing = false, lastTime = null, pourDuration = 0, completed = false, failed = false;
+  let acidVolume = 25; // mL in flask
+
   document.body.addEventListener('keydown', e => { if (e.code === 'Space') isPressing = true; });
   document.body.addEventListener('keyup', e => { if (e.code === 'Space') isPressing = false; });
-  // Mobile touch
   window.addEventListener('touchstart', () => { isPressing = true; });
   window.addEventListener('touchend', () => { isPressing = false; });
 
   function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, titrationCanvas.width, titrationCanvas.height);
     // Burette
     ctx.fillStyle = '#555'; ctx.fillRect(180, 10, 40, 210);
     ctx.fillStyle = '#f28b82'; let bh = (buretteLevel/100)*200;
@@ -295,7 +304,7 @@
         document.getElementById('repeatBtn').style.display = 'inline-block';
       }
 
-      if (pourDuration >= 2) { // <<<< set to 2 seconds here
+      if (pourDuration >= 2) {
         completed = true;
         status.textContent = 'Titration complete!';
         showCalculation();
@@ -336,24 +345,23 @@
   }
 
   function showCalculation() {
-    const volumeUsed = totalVolume * (1 - buretteLevel/100); // mL used
-    const C1 = knownConcentration;
-    const V1 = volumeUsed / 1000; // mL to L
-    const V2 = 0.025; // Assume 25mL acid in flask (standard)
+    const volumeUsed = (100 - buretteLevel).toFixed(2);
+    const C1 = 0.1; // Known concentration of NaOH
+    const V1 = volumeUsed / 1000; // Convert mL to L
+    const V2 = acidVolume / 1000;
 
-    const C2 = (C1 * V1) / V2; // Calculate unknown concentration
+    const C2 = (C1 * V1) / V2;
 
     completionMessage.innerHTML = `
       <strong>Congratulations!</strong> You've successfully completed the titration.<br><br>
-      <b>Known (C₁):</b> ${C1} M<br>
-      <b>Volume Used (V₁):</b> ${volumeUsed.toFixed(2)} mL<br>
-      <b>Volume Flask (V₂):</b> 25.00 mL<br><br>
+      <b>Known (C₁):</b> ${C1} M NaOH<br>
+      <b>Volume Used (V₁):</b> ${volumeUsed} mL<br>
+      <b>Acid Volume (V₂):</b> ${acidVolume} mL<br><br>
       <b>Formula:</b> C₁V₁ = C₂V₂<br><br>
-      <b>Calculated Unknown (C₂):</b> ${C2.toFixed(3)} M
+      <b>Calculated HCl Concentration (C₂):</b> ${C2.toFixed(3)} M
     `;
     completionMessage.style.display = 'block';
   }
 </script>
-
 </body>
 </html>
