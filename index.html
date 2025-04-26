@@ -14,9 +14,9 @@
     }
     #logo {
       display: block;
-      margin: 20px auto 0 auto;
+      margin: 20px auto;
       width: 606px;
-      max-width: 100%;
+      max-width: 90%;
       height: auto;
     }
     h1 { margin-top: 10px; }
@@ -84,7 +84,7 @@
       margin: 20px auto;
       position: relative;
     }
-    .bar { height: 100%; width: 0; background-color: #76c7c0; transition: width 3s ease; }
+    .bar { height: 100%; width: 0; background-color: #76c7c0; }
     .target-zone {
       position: absolute;
       height: 100%;
@@ -105,40 +105,8 @@
     #titrationInfo { display: none; margin-top: 20px; font-size: 15px; padding: 10px; background: #fff3cd; border-left: 6px solid #ffeeba; }
     #infoBox, .pin { font-size: 14px; color: #333; margin: 10px; }
     .pin { background: #ffcc00; padding: 5px; border-radius: 4px; display: inline-block; }
-    #quizSection {
-      background-color: #f0f8ff;
-      padding: 20px;
-      margin: 30px auto;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 600px;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
-    }
-    .quiz-question {
-      text-align: left;
-      margin-bottom: 20px;
-    }
-    #quizSection button {
-      background: #28a745;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    #quizSection button:hover {
-      background: #218838;
-    }
-    #quizResult {
-      font-size: 16px;
-      font-weight: bold;
-      color: #155724;
-      margin-top: 15px;
-    }
     @media (max-width: 768px) {
-      #logo { width: 100%; max-width: 606px; }
+      #logo { width: 80%; }
       h1 { font-size: 24px; }
       h2 { font-size: 18px; }
       button { font-size: 14px; padding: 8px 20px; }
@@ -147,68 +115,144 @@
   </style>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
-<body onload="initExperiment()">
+<body>
   <img src="Brand Logo.png" id="logo" onerror="this.src='fallback.png'">
-  <h1>EduLab - Virtual Titration</h1>
+  <h1>EduLab</h1>
   <h2>No Equipment? No Problem.</h2>
 
-  <div id="quizSection">
-    <h2>Test Your Knowledge</h2>
-    <div class="quiz-question">
-      <p><strong>1. What is the purpose of titration?</strong></p>
-      <label><input type="radio" name="q1" value="a"> To change the color of the indicator</label><br>
-      <label><input type="radio" name="q1" value="b"> To determine the volume of solution used</label><br>
-      <label><input type="radio" name="q1" value="c"> To determine the concentration of an unknown solution</label>
+  <div id="experimentMenu">
+    <div class="experiment">
+      <img src="Titration.png" alt="Titration" width="60" height="60" onerror="this.src='fallback.png'">
+      <h3>Titration</h3>
+      <button onclick="startTitration()">Start Titration</button>
     </div>
-    <div class="quiz-question">
-      <p><strong>2. Which solution is typically placed in the burette?</strong></p>
-      <label><input type="radio" name="q2" value="a"> HCl</label><br>
-      <label><input type="radio" name="q2" value="b"> NaOH</label><br>
-      <label><input type="radio" name="q2" value="c"> Indicator</label>
+    <div class="experiment">
+      <img src="Projectile Motion.png" alt="Projectile Motion" width="60" height="60" onerror="this.src='fallback.png'">
+      <h3>Projectile Motion</h3>
+      <p>Coming Soon</p>
     </div>
-    <div class="quiz-question">
-      <p><strong>3. What indicates the endpoint of the titration?</strong></p>
-      <label><input type="radio" name="q3" value="a"> Volume of NaOH added</label><br>
-      <label><input type="radio" name="q3" value="b"> The time taken</label><br>
-      <label><input type="radio" name="q3" value="c"> A color change in the solution</label>
+    <div class="experiment">
+      <img src="Acid Base.png" alt="Acid Base" width="60" height="60" onerror="this.src='fallback.png'">
+      <h3>Acid Base</h3>
+      <p>Coming Soon</p>
     </div>
-    <button onclick="checkAnswers()">Submit Answers</button>
-    <p id="quizResult"></p>
+    <div class="experiment">
+      <img src="Electrolysis.png" alt="Electrolysis" width="60" height="60" onerror="this.src='fallback.png'">
+      <h3>Electrolysis</h3>
+      <p>Coming Soon</p>
+    </div>
+  </div>
+
+  <div id="titrationSection">
+    <h2>Titration Experiment</h2>
+    <div class="model-label">This is a Burette</div>
+    <model-viewer src="burette.glb" alt="3D Burette" auto-rotate camera-controls></model-viewer>
+    <div class="model-label">This is a Conical Flask</div>
+    <model-viewer src="conical_flask.glb" alt="3D Conical Flask" auto-rotate camera-controls></model-viewer>
+    <canvas id="titrationCanvas" width="400" height="300"></canvas>
+    <div class="bar-container">
+      <div id="inputBar" class="bar"></div>
+      <div class="target-zone"></div>
+    </div>
+    <p>Hold SPACE to pour within the yellow zone</p>
+    <p id="status"></p>
+    <div id="completionMessage">Congratulations! You've successfully completed the titration experiment.</div>
+    <button id="repeatBtn" onclick="resetExperiment()" style="display:none;">Repeat Experiment</button>
+    <button onclick="returnToMenu()">Return to Menu</button>
+    <button onclick="toggleTitrationInfo()">What is Titration?</button>
+    <div id="titrationInfo">
+      Titration is a technique where a solution of known concentration is used to determine the concentration of an unknown solution. The goal is to identify the exact point where neutralization occurs, often indicated by a color change.
+    </div>
+    <div id="infoBox">
+      <span class="pin">Burette: Contains NaOH (Sodium Hydroxide)</span>
+      <span class="pin">Flask: Contains HCl (Hydrochloric Acid) with indicator</span>
+    </div>
   </div>
 
   <script>
-    function initExperiment() {
-      // Hide experiment visuals if they exist
-      const burrette = document.getElementById("burrette");
-      const flask = document.getElementById("flask");
-      if (burrette) burrette.style.display = "none";
-      if (flask) flask.style.display = "none";
+    const canvas = document.getElementById('titrationCanvas');
+    const ctx = canvas.getContext('2d');
+    const inputBar = document.getElementById('inputBar');
+    const status = document.getElementById('status');
+    const completionMessage = document.getElementById('completionMessage');
+    let flaskLevel = 80, buretteLevel = 100, barValue = 0;
+    let isPressing = false, lastTime = null, pourDuration = 0, completed = false;
+
+    document.body.addEventListener('keydown', e => { if (e.code === 'Space') isPressing = true; });
+    document.body.addEventListener('keyup', e => { if (e.code === 'Space') isPressing = false; });
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Burette
+      ctx.fillStyle = '#555'; ctx.fillRect(180, 10, 40, 210);
+      ctx.fillStyle = '#f28b82'; let bh = (buretteLevel/100)*200;
+      ctx.fillRect(185, 15+(200-bh),30,bh);
+      ctx.strokeStyle='#000'; ctx.strokeRect(180,10,40,210);
+      ctx.fillStyle='#000'; ctx.fillText('Burette',170,8);
+      // Flask
+      ctx.beginPath(); ctx.moveTo(150,260); ctx.lineTo(170,300);
+      ctx.lineTo(230,300); ctx.lineTo(250,260);
+      ctx.quadraticCurveTo(200,250,150,260); ctx.stroke();
+      ctx.fillStyle = completed? '#7CFC00':'#aecbfa'; let fh=(flaskLevel/100)*40;
+      ctx.beginPath(); ctx.moveTo(170,300); ctx.lineTo(230,300);
+      ctx.lineTo(230,300-fh); ctx.lineTo(170,300-fh);
+      ctx.closePath(); ctx.fill(); ctx.fillStyle='#000'; ctx.fillText('Flask',190,290);
     }
 
-    function checkAnswers() {
-      const q1 = document.querySelector('input[name="q1"]:checked')?.value;
-      const q2 = document.querySelector('input[name="q2"]:checked')?.value;
-      const q3 = document.querySelector('input[name="q3"]:checked')?.value;
-      let score = 0;
+    function update(timestamp) {
+      if (!lastTime) lastTime = timestamp;
+      const dt = (timestamp - lastTime)/1000;
+      lastTime = timestamp;
 
-      if (q1 === 'c') score++;
-      if (q2 === 'b') score++;
-      if (q3 === 'c') score++;
+      if (!completed) {
+        barValue = isPressing? Math.min(100,barValue+dt*100/1): Math.max(0,barValue-dt*50/1);
+        inputBar.style.width = barValue + '%';
 
-      const resultText = `You got ${score}/3 correct. ${score === 3 ? 'Great job!' : 'Review the info above and try again!'}`;
-      document.getElementById('quizResult').textContent = resultText;
-    }
+        if (isPressing && barValue >= 40 && barValue <= 60) {
+          pourDuration += dt;
+          buretteLevel = Math.max(0, buretteLevel - dt*5);
+          flaskLevel  = Math.min(100, flaskLevel  + dt*5);
+          status.textContent = `Pouring... ${pourDuration.toFixed(1)}s`;
+        } else if (isPressing) {
+          pourDuration = 0;
+          status.textContent = barValue>60? 'Too fast!': 'Too slow!';
+        }
 
-    // Fix for space bar control on mobile
-    window.addEventListener('touchstart', function() {
-      window.focus();
-    });
-    document.body.addEventListener('keydown', function(event) {
-      if (event.code === 'Space' || event.keyCode === 32) {
-        event.preventDefault();
-        // Insert titration balance logic here
+        if (pourDuration >= 4) {
+          completed = true;
+          status.textContent = 'Titration complete!';
+          completionMessage.style.display = 'block';
+          document.getElementById('repeatBtn').style.display = 'inline-block';
+        }
       }
-    });
+
+      draw();
+      requestAnimationFrame(update);
+    }
+
+    function startTitration() {
+      document.getElementById('experimentMenu').style.display = 'none';
+      document.getElementById('titrationSection').style.display = 'block';
+      lastTime = null;
+      requestAnimationFrame(update);
+    }
+
+    function resetExperiment() {
+      flaskLevel=80; buretteLevel=100; barValue=0; pourDuration=0; completed=false;
+      status.textContent=''; completionMessage.style.display='none'; document.getElementById('repeatBtn').style.display='none';
+      lastTime=null;
+      requestAnimationFrame(update);
+    }
+
+    function returnToMenu() {
+      document.getElementById('titrationSection').style.display='none';
+      document.getElementById('experimentMenu').style.display='flex';
+    }
+
+    function toggleTitrationInfo() {
+      const info = document.getElementById('titrationInfo');
+      info.style.display = info.style.display === 'block'? 'none':'block';
+    }
   </script>
 </body>
 </html>
