@@ -14,13 +14,13 @@
     }
     #logo {
       display: block;
-      margin: 0 auto;
+      margin: 20px auto;
       width: 606px;
       max-width: 90%;
       height: auto;
     }
-    h1 { margin-top: 20px; }
-    h2 { margin-top: 10px; color: #555; }
+    h1 { margin-top: 10px; }
+    h2 { margin-top: 5px; color: #555; }
     #experimentMenu {
       margin: 40px auto;
       display: flex;
@@ -37,8 +37,7 @@
       text-align: center;
     }
     .experiment img {
-      display: block;
-      margin: 0 auto 10px;
+      margin-bottom: 10px;
     }
     button {
       margin-top: 15px;
@@ -58,11 +57,16 @@
       background: linear-gradient(145deg, #3b79d6, #4e9af1);
       transform: scale(1.05);
     }
+    .model-label {
+      font-size: 16px;
+      margin-top: 10px;
+      font-weight: bold;
+    }
     model-viewer {
       width: 100%;
       max-width: 600px;
       height: 300px;
-      margin: 20px auto;
+      margin: 10px auto;
     }
     canvas {
       background-color: #fff;
@@ -80,7 +84,7 @@
       margin: 20px auto;
       position: relative;
     }
-    .bar { height: 100%; width: 0; background-color: #76c7c0; transition: width 0.1s; }
+    .bar { height: 100%; width: 0; background-color: #76c7c0; }
     .target-zone {
       position: absolute;
       height: 100%;
@@ -113,7 +117,7 @@
 </head>
 <body>
   <img src="Brand Logo.png" id="logo" onerror="this.src='fallback.png'">
-  <h1>Welcome To EduLab</h1>
+  <h1>EduLab - Virtual Titration</h1>
   <h2>No Equipment? No Problem.</h2>
 
   <div id="experimentMenu">
@@ -141,7 +145,9 @@
 
   <div id="titrationSection">
     <h2>Titration Experiment</h2>
+    <div class="model-label">This is a Burette</div>
     <model-viewer src="burette.glb" alt="3D Burette" auto-rotate camera-controls></model-viewer>
+    <div class="model-label">This is a Flask</div>
     <model-viewer src="conical_flask.glb" alt="3D Conical Flask" auto-rotate camera-controls></model-viewer>
     <canvas id="titrationCanvas" width="400" height="300"></canvas>
     <div class="bar-container">
@@ -169,69 +175,83 @@
     const inputBar = document.getElementById('inputBar');
     const status = document.getElementById('status');
     const completionMessage = document.getElementById('completionMessage');
-    let flaskLevel = 80, buretteLevel = 100, barValue = 0, isPressing = false, lastAdd = 0;
-    let pourDuration = 0;
-    let completed = false;
+    let flaskLevel = 80, buretteLevel = 100, barValue = 0;
+    let isPressing = false, lastTime = null, pourDuration = 0, completed = false;
 
     document.body.addEventListener('keydown', e => { if (e.code === 'Space') isPressing = true; });
     document.body.addEventListener('keyup', e => { if (e.code === 'Space') isPressing = false; });
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Draw burette
+      // Burette
       ctx.fillStyle = '#555'; ctx.fillRect(180, 10, 40, 210);
       ctx.fillStyle = '#f28b82'; let bh = (buretteLevel/100)*200;
       ctx.fillRect(185, 15+(200-bh),30,bh);
       ctx.strokeStyle='#000'; ctx.strokeRect(180,10,40,210);
       ctx.fillStyle='#000'; ctx.fillText('Burette',170,8);
-      // Draw flask
+      // Flask
       ctx.beginPath(); ctx.moveTo(150,260); ctx.lineTo(170,300);
       ctx.lineTo(230,300); ctx.lineTo(250,260);
-      ctx.quadraticCurveTo(200,250,150,260);
-      ctx.stroke();
+      ctx.quadraticCurveTo(200,250,150,260); ctx.stroke();
       ctx.fillStyle = completed? '#7CFC00':'#aecbfa'; let fh=(flaskLevel/100)*40;
       ctx.beginPath(); ctx.moveTo(170,300); ctx.lineTo(230,300);
       ctx.lineTo(230,300-fh); ctx.lineTo(170,300-fh);
-      ctx.closePath(); ctx.fill();
-      ctx.fillStyle='#000'; ctx.fillText('Flask',190,290);
+      ctx.closePath(); ctx.fill(); ctx.fillStyle='#000'; ctx.fillText('Flask',190,290);
     }
 
-    function update() {
-      if (completed) return;
-      barValue = isPressing? Math.min(100,barValue+1):Math.max(0,barValue-0.5);
-      inputBar.style.width = barValue+'%';
-      const now = Date.now();
-      if (barValue>=40 && barValue<=60 && now-lastAdd>500) {
-        if (buretteLevel>0 && flaskLevel<100) {
-          buretteLevel-=2; flaskLevel+=2; lastAdd=now; pourDuration+=0.5;
-          status.textContent='Titrant added.';
+    function update(timestamp) {
+      if (!lastTime) lastTime = timestamp;
+      const dt = (timestamp - lastTime)/1000;
+      lastTime = timestamp;
+
+      if (!completed) {
+        barValue = isPressing? Math.min(100,barValue+dt*100/1): Math.max(0,barValue-dt*50/1);
+        inputBar.style.width = barValue + '%';
+
+        if (isPressing && barValue >= 40 && barValue <= 60) {
+          pourDuration += dt;
+          buretteLevel = Math.max(0, buretteLevel - dt*5);
+          flaskLevel  = Math.min(100, flaskLevel  + dt*5);
+          status.textContent = `Pouring... ${pourDuration.toFixed(1)}s`;
+        } else if (isPressing) {
+          pourDuration = 0;
+          status.textContent = barValue>60? 'Too fast!': 'Too slow!';
         }
-      } else if (barValue>60 && isPressing) { status.textContent='Too fast!'; pourDuration=0; }
-      else if (barValue<40 && isPressing) { status.textContent='Too slow!'; pourDuration=0; }
-      if (pourDuration>=4 && !completed) {
-        completed=true; status.textContent='Titration complete!';
-        completionMessage.style.display='block'; document.getElementById('repeatBtn').style.display='inline-block'; draw(); return;
+
+        if (pourDuration >= 4) {
+          completed = true;
+          status.textContent = 'Titration complete!';
+          completionMessage.style.display = 'block';
+          document.getElementById('repeatBtn').style.display = 'inline-block';
+        }
       }
-      draw(); requestAnimationFrame(update);
+
+      draw();
+      requestAnimationFrame(update);
     }
 
     function startTitration() {
-      document.getElementById('experimentMenu').style.display='none';
-      document.getElementById('titrationSection').style.display='block';
-      draw(); update();
+      document.getElementById('experimentMenu').style.display = 'none';
+      document.getElementById('titrationSection').style.display = 'block';
+      lastTime = null;
+      requestAnimationFrame(update);
     }
+
     function resetExperiment() {
       flaskLevel=80; buretteLevel=100; barValue=0; pourDuration=0; completed=false;
-      status.textContent=''; completionMessage.style.display='none';
-      document.getElementById('repeatBtn').style.display='none'; draw(); update();
+      status.textContent=''; completionMessage.style.display='none'; document.getElementById('repeatBtn').style.display='none';
+      lastTime=null;
+      requestAnimationFrame(update);
     }
+
     function returnToMenu() {
       document.getElementById('titrationSection').style.display='none';
       document.getElementById('experimentMenu').style.display='flex';
     }
+
     function toggleTitrationInfo() {
-      const info=document.getElementById('titrationInfo');
-      info.style.display = info.style.display==='block'?'none':'block';
+      const info = document.getElementById('titrationInfo');
+      info.style.display = info.style.display === 'block'? 'none':'block';
     }
   </script>
 </body>
