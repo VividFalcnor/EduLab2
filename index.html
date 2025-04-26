@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduLab - Virtual Titration Experiment</title>
+  <title>EduLab - Virtual Science Lab</title>
   <link rel="preload" href="burette.glb" as="fetch">
   <link rel="preload" href="conical_flask.glb" as="fetch">
   <style>
@@ -23,12 +23,13 @@
       margin: 0;
     }
     #headerBox {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      background: linear-gradient(145deg, #ffffff 0%, #f0fff0 100%);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       display: inline-block;
-      margin-top: 20px;
+      margin: 25px 0;
+      border: 1px solid #d0ffd0;
     }
     #logo {
       display: block;
@@ -43,9 +44,9 @@
       animation: pulseColor 2s infinite;
     }
     @keyframes pulseColor {
-      0% { color: #4e9af1; }
-      50% { color: #1d4ed8; }
-      100% { color: #4e9af1; }
+      0% { color: #75c475; }
+      50% { color: #2a722a; }
+      100% { color: #75c475; }
     }
     h2 {
       margin-top: 5px;
@@ -94,6 +95,10 @@
       transition: background 0.3s, transform 0.2s;
       width: 90%;
       max-width: 200px;
+    }
+    .experiment:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
     }
     button:hover {
       background: linear-gradient(145deg, #3b79d6, #4e9af1);
@@ -144,8 +149,8 @@
 
   <div id="headerBox">
     <img src="Brand Logo.png" id="logo" onerror="this.src='fallback.png'">
-    <h1>EduLab - Virtual Titration</h1>
-    <h2>Experience hands-on science experiments virtually, empowering students anywhere to learn without the need for physical lab equipment.</h2>
+    <h1>EduLab - Your Virtual Science Lab</h1>
+    <h2>Experience hands-on science experiments virtually.</h2>
   </div>
 
   <div id="failMessage">⚠️ Pour within the yellow zone! Try again!</div>
