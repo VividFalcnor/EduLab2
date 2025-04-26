@@ -4,19 +4,92 @@
   <meta charset="UTF-8">
   <title>EduLab - Virtual Titration Experiment</title>
   <style>
-    body { background-color: #eef3fb; font-family: Trebuchet MS, sans-serif; text-align: center; padding: 20px; }
-    #experimentMenu { margin-bottom: 30px; }
-    #titrationSection { display: none; }
-    .bar-container { width: 400px; height: 20px; background-color: #ddd; margin: 20px auto; position: relative; }
-    .bar { height: 100%; width: 0; background-color: #76c7c0; transition: width 0.1s; }
-    .target-zone { position: absolute; height: 100%; background-color: rgba(255,215,0,0.5); left: 40%; width: 20%; pointer-events: none; }
-    #status { font-size: 18px; margin-top: 10px; }
-    canvas { background-color: #fff; border: 1px solid #ccc; margin-top: 20px; }
-    button { margin-top: 15px; padding: 10px 20px; font-size: 16px; border: none; border-radius: 6px; background-color: #4285f4; color: #fff; cursor: pointer; }
-    #infoBox, .pin { font-size: 14px; color: #333; margin: 10px; }
-    .pin { background: #ffcc00; padding: 5px; border-radius: 4px; display: inline-block; }
-    #titrationInfo { margin-top: 20px; font-size: 15px; padding: 10px; background: #fff3cd; border-left: 6px solid #ffeeba; display: none; }
-    #logo { position: absolute; top: 10px; left: 10px; height: 50px; }
+    body {
+      background-color: #eef3fb;
+      font-family: Trebuchet MS, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #experimentMenu {
+      margin-bottom: 30px;
+    }
+    #titrationSection {
+      display: none;
+    }
+    .bar-container {
+      width: 400px;
+      height: 20px;
+      background-color: #ddd;
+      margin: 20px auto;
+      position: relative;
+    }
+    .bar {
+      height: 100%;
+      width: 0;
+      background-color: #76c7c0;
+      transition: width 0.1s;
+    }
+    .target-zone {
+      position: absolute;
+      height: 100%;
+      background-color: rgba(255,215,0,0.5);
+      left: 40%;
+      width: 20%;
+      pointer-events: none;
+    }
+    #status {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    canvas {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      background-color: #4285f4;
+      color: #fff;
+      cursor: pointer;
+    }
+    #infoBox, .pin {
+      font-size: 14px;
+      color: #333;
+      margin: 10px;
+    }
+    .pin {
+      background: #ffcc00;
+      padding: 5px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    #titrationInfo {
+      margin-top: 20px;
+      font-size: 15px;
+      padding: 10px;
+      background: #fff3cd;
+      border-left: 6px solid #ffeeba;
+      display: none;
+    }
+    #logo {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      height: 50px;
+    }
+    .experiment {
+      display: inline-block;
+      margin: 20px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .experiment:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
   </style>
 </head>
 <body>
@@ -26,9 +99,11 @@
 
   <div id="experimentMenu">
     <p>Select an experiment to explore:</p>
-    <button onclick="startTitration()">Start Titration Experiment</button>
-      <img src="Titration.png" alt="Titration" width="60" height="60" onerror="this.src='fallback.png'">
-      <h3>Titration</h3>
+    <div class="experiment">
+      <button onclick="startTitration()">
+        <img src="Titration.png" alt="Titration" width="60" height="60" onerror="this.src='fallback.png'">
+        <h3>Titration</h3>
+      </button>
     </div>
     <div class="experiment">
       <img src="Projectile Motion.png" alt="Projectile Motion" width="60" height="60" onerror="this.src='fallback.png'">
@@ -46,7 +121,6 @@
       <p>Coming Soon</p>
     </div>
   </div>
-  
 
   <div id="titrationSection">
     <h2>Titration Experiment</h2>
@@ -83,18 +157,16 @@
 
     function draw() {
       ctx.clearRect(0, 0, 400, 300);
-      // Draw detailed burette
       ctx.fillStyle = '#555';
-      ctx.fillRect(180, 10, 40, 210); // outer case
+      ctx.fillRect(180, 10, 40, 210);
       ctx.fillStyle = '#f28b82';
       const bh = (buretteLevel / 100) * 200;
-      ctx.fillRect(185, 15 + (200 - bh), 30, bh); // liquid level
+      ctx.fillRect(185, 15 + (200 - bh), 30, bh);
       ctx.strokeStyle = '#000';
       ctx.strokeRect(180, 10, 40, 210);
       ctx.fillStyle = '#000';
       ctx.fillText("Burette", 170, 8);
 
-      // Draw detailed flask
       ctx.beginPath();
       ctx.moveTo(150, 260); ctx.lineTo(170, 300);
       ctx.lineTo(230, 300); ctx.lineTo(250, 260);
