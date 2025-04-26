@@ -1,3 +1,5 @@
+no no keep this code but only remove the floating chemical symbols aroundd the place:
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +9,14 @@
   <link rel="preload" href="burette.glb" as="fetch">
   <link rel="preload" href="conical_flask.glb" as="fetch">
   <style>
+    /* Background Canvas */
+    #backgroundCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
     body {
       background-color: #e2ffdd;
       font-family: "Trebuchet MS", sans-serif;
@@ -15,13 +25,12 @@
       margin: 0;
     }
     #headerBox {
-      background: linear-gradient(145deg, #ffffff 0%, #f0fff0 100%);
+      background: white;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
       display: inline-block;
       margin-top: 20px;
-      border: 1px solid #d0ffd0;
     }
     #logo {
       display: block;
@@ -36,9 +45,9 @@
       animation: pulseColor 2s infinite;
     }
     @keyframes pulseColor {
-      0% { color: #75c475; }
-      50% { color: #2a722a; }
-      100% { color: #75c475; }
+      0% { color: #4e9af1; }
+      50% { color: #1d4ed8; }
+      100% { color: #4e9af1; }
     }
     h2 {
       margin-top: 5px;
@@ -72,10 +81,6 @@
       border-radius: 12px;
       box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
       text-align: center;
-      transition: transform 0.2s;
-    }
-    .experiment:hover {
-      transform: translateY(-5px);
     }
     .experiment img { margin-bottom: 10px; }
     button {
@@ -88,7 +93,7 @@
       color: white;
       cursor: pointer;
       box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-      transition: all 0.3s;
+      transition: background 0.3s, transform 0.2s;
       width: 90%;
       max-width: 200px;
     }
@@ -96,91 +101,36 @@
       background: linear-gradient(145deg, #3b79d6, #4e9af1);
       transform: scale(1.05);
     }
-    .model-label { 
-      font-size: 16px; 
-      margin-top: 10px; 
-      font-weight: bold;
-      color: #2a722a;
-    }
+    .model-label { font-size: 16px; margin-top: 10px; font-weight: bold; }
     model-viewer {
-      width: 100%; 
-      max-width: 600px; 
-      height: 300px; 
-      margin: 10px auto;
+      width: 100%; max-width: 600px; height: 300px; margin: 10px auto;
       touch-action: none;
-      border-radius: 8px;
-      overflow: hidden;
     }
     canvas {
-      background-color: #fff; 
-      border: 1px solid #ccc; 
-      margin-top: 20px;
-      width: 90%; 
-      max-width: 400px; 
-      height: auto;
-      border-radius: 8px;
+      background-color: #fff; border: 1px solid #ccc; margin-top: 20px;
+      width: 90%; max-width: 400px; height: auto;
     }
     .bar-container {
-      width: 90%; 
-      max-width: 400px; 
-      height: 20px; 
-      background-color: #ddd;
-      margin: 20px auto; 
-      position: relative;
-      border-radius: 10px;
-      overflow: hidden;
+      width: 90%; max-width: 400px; height: 20px; background-color: #ddd;
+      margin: 20px auto; position: relative;
     }
-    .bar { 
-      height: 100%; 
-      width: 0; 
-      background-color: #76c7c0;
-      transition: width 0.2s ease;
-    }
+    .bar { height: 100%; width: 0; background-color: #76c7c0; }
     .target-zone {
-      position: absolute; 
-      height: 100%; 
-      background-color: rgba(255,215,0,0.3);
-      left: 40%; 
-      width: 20%; 
-      pointer-events: none;
+      position: absolute; height: 100%; background-color: rgba(255,215,0,0.5);
+      left: 40%; width: 20%; pointer-events: none;
     }
-    #status { 
-      font-size: 18px; 
-      margin-top: 10px; 
-      color: #2a722a;
-    }
+    #status { font-size: 18px; margin-top: 10px; }
     #completionMessage {
-      background-color: #d4edda; 
-      border-left: 6px solid #28a745;
-      color: #155724; 
-      padding: 10px; 
-      margin: 20px auto;
-      width: 90%; 
-      max-width: 600px; 
-      display: none; 
-      border-radius: 5px;
+      background-color: #d4edda; border-left: 6px solid #28a745;
+      color: #155724; padding: 10px; margin: 20px auto;
+      width: 90%; max-width: 600px; display: none; border-radius: 5px;
     }
     #titrationInfo {
-      display: none; 
-      margin-top: 20px; 
-      font-size: 15px; 
-      padding: 10px;
-      background: #fff3cd; 
-      border-left: 6px solid #ffeeba;
-      border-radius: 5px;
+      display: none; margin-top: 20px; font-size: 15px; padding: 10px;
+      background: #fff3cd; border-left: 6px solid #ffeeba;
     }
-    #infoBox, .pin { 
-      font-size: 14px; 
-      color: #333; 
-      margin: 10px; 
-    }
-    .pin { 
-      background: #ffcc00; 
-      padding: 5px 10px;
-      border-radius: 15px; 
-      display: inline-block;
-      font-weight: bold;
-    }
+    #infoBox, .pin { font-size: 14px; color: #333; margin: 10px; }
+    .pin { background: #ffcc00; padding: 5px; border-radius: 4px; display: inline-block; }
     @media (max-width: 768px) {
       #logo { width: 80%; }
       h1 { font-size: 24px; }
@@ -192,17 +142,111 @@
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
+  <canvas id="backgroundCanvas"></canvas>
+
   <div id="headerBox">
     <img src="Brand Logo.png" id="logo" onerror="this.src='fallback.png'">
     <h1>EduLab - Virtual Titration</h1>
     <h2>Experience hands-on science experiments virtually, empowering students anywhere to learn without the need for physical lab equipment.</h2>
   </div>
 
-  <!-- Rest of the HTML remains the same as previous version -->
-  <!-- ... (experimentMenu and titrationSection content identical to previous version) ... -->
+  <div id="failMessage">⚠️ Pour within the yellow zone! Try again!</div>
+
+  <div id="experimentMenu">
+    <div class="experiment">
+      <img src="Titration.png" alt="Titration" width="60" height="60" onerror="this.src='fallback.png'">
+      <h3>Titration</h3>
+      <button onclick="startTitration()">Start Titration</button>
+    </div>
+    <div class="experiment">
+      <img src="Projectile Motion.png" alt="Projectile Motion" width="60" height="60" onerror="this.src='fallback.png'">
+      <h3>Projectile Motion</h3>
+      <p>Coming Soon</p>
+    </div>
+    <div class="experiment">
+      <img src="Acid Base.png" alt="Acid Base" width="60" height="60" onerror="this.src='fallback.png'">
+      <h3>Acid Base</h3>
+      <p>Coming Soon</p>
+    </div>
+    <div class="experiment">
+      <img src="Electrolysis.png" alt="Electrolysis" width="60" height="60" onerror="this.src='fallback.png'">
+      <h3>Electrolysis</h3>
+      <p>Coming Soon</p>
+    </div>
+  </div>
+
+  <div id="titrationSection" style="display:none;">
+    <h2>Titration Experiment</h2>
+    <div class="model-label">This is a Burette</div>
+    <model-viewer src="burette.glb" alt="3D Burette" auto-rotate camera-controls></model-viewer>
+    <div class="model-label">This is a Conical Flask</div>
+    <model-viewer src="conical_flask.glb" alt="3D Conical Flask" auto-rotate camera-controls></model-viewer>
+    <canvas id="titrationCanvas" width="400" height="300"></canvas>
+    <div class="bar-container">
+      <div id="inputBar" class="bar"></div>
+      <div class="target-zone"></div>
+    </div>
+    <p>Hold SPACE (or touch) to pour within the yellow zone</p>
+    <p id="status"></p>
+    <div id="completionMessage">Congratulations! You've successfully completed the titration experiment.</div>
+    <button id="repeatBtn" onclick="resetExperiment()" style="display:none;">Repeat Experiment</button>
+    <button onclick="returnToMenu()">Return to Menu</button>
+    <button onclick="toggleTitrationInfo()">What is Titration?</button>
+    <div id="titrationInfo">
+      Titration is a technique where a solution of known concentration is used to determine the concentration of an unknown solution. The goal is to identify the exact point where neutralization occurs, often indicated by a color change.
+    </div>
+    <div id="infoBox">
+      <span class="pin">Burette: Contains NaOH (Sodium Hydroxide)</span>
+      <span class="pin">Flask: Contains HCl (Hydrochloric Acid) with indicator</span>
+    </div>
+  </div>
 
 <script>
-  // Titration Experiment Logic (floating symbols removed)
+  // Floating Symbols Animation
+  const bgCanvas = document.getElementById('backgroundCanvas');
+  const bgCtx = bgCanvas.getContext('2d');
+  let width, height;
+  const symbols = ['H₂O', 'NaCl', 'CO₂', 'H⁺', 'OH⁻', 'O₂', 'N₂', 'CH₄'];
+  const particles = [];
+
+  function resizeCanvas() {
+    width = bgCanvas.width = window.innerWidth;
+    height = bgCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  for (let i = 0; i < 30; i++) {
+    particles.push({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      speedX: (Math.random() - 0.5) * 0.5,
+      speedY: (Math.random() - 0.5) * 0.5,
+      size: Math.random() * 20 + 20,
+      symbol: symbols[Math.floor(Math.random() * symbols.length)],
+      opacity: Math.random() * 0.3 + 0.2
+    });
+  }
+
+  function animate() {
+    bgCtx.clearRect(0, 0, width, height);
+    bgCtx.font = "bold 20px Arial";
+    particles.forEach(p => {
+      bgCtx.globalAlpha = p.opacity;
+      bgCtx.fillStyle = "#000000";
+      bgCtx.fillText(p.symbol, p.x, p.y);
+      p.x += p.speedX;
+      p.y += p.speedY;
+      if (p.x < -50) p.x = width + 50;
+      if (p.x > width + 50) p.x = -50;
+      if (p.y < -50) p.y = height + 50;
+      if (p.y > height + 50) p.y = -50;
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  // Titration Experiment Logic
   const titrationCanvas = document.getElementById('titrationCanvas');
   const ctx = titrationCanvas.getContext('2d');
   const inputBar = document.getElementById('inputBar');
@@ -217,8 +261,109 @@
   window.addEventListener('touchstart', () => { isPressing = true; });
   window.addEventListener('touchend', () => { isPressing = false; });
 
-  // Rest of the JavaScript remains the same as previous version
-  // ... (draw, update, and other functions identical to previous version) ...
+  function draw() {
+    ctx.clearRect(0, 0, titrationCanvas.width, titrationCanvas.height);
+    // Burette
+    ctx.fillStyle = '#555'; ctx.fillRect(180, 10, 40, 210);
+    ctx.fillStyle = '#f28b82'; let bh = (buretteLevel/100)*200;
+    ctx.fillRect(185, 15+(200-bh),30,bh);
+    ctx.strokeStyle='#000'; ctx.strokeRect(180,10,40,210);
+    ctx.fillStyle='#000'; ctx.fillText('Burette',170,8);
+    // Flask
+    ctx.beginPath(); ctx.moveTo(150,260); ctx.lineTo(170,300);
+    ctx.lineTo(230,300); ctx.lineTo(250,260);
+    ctx.quadraticCurveTo(200,250,150,260); ctx.stroke();
+    ctx.fillStyle = completed? '#7CFC00': failed? '#ff6961' : '#aecbfa';
+    let fh = (flaskLevel/100)*40;
+    ctx.beginPath(); ctx.moveTo(170,300); ctx.lineTo(230,300);
+    ctx.lineTo(230,300-fh); ctx.lineTo(170,300-fh);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#000'; ctx.fillText('Flask',190,290);
+  }
+
+  function update(timestamp) {
+    if (!lastTime) lastTime = timestamp;
+    const dt = (timestamp - lastTime)/1000;
+    lastTime = timestamp;
+
+    if (!completed && !failed) {
+      barValue = isPressing? Math.min(100, barValue + dt*100) : Math.max(0, barValue - dt*50);
+      inputBar.style.width = barValue + '%';
+
+      if (isPressing && barValue >= 40 && barValue <= 60) {
+        pourDuration += dt;
+        buretteLevel = Math.max(0, buretteLevel - dt*5);
+        flaskLevel = Math.min(100, flaskLevel + dt*5);
+        status.textContent = `Pouring... ${pourDuration.toFixed(1)}s`;
+      } else if (isPressing) {
+        pourDuration = 0;
+        status.textContent = barValue>60? 'Too fast!':'Too slow!';
+      }
+
+      if (buretteLevel <= 0) {
+        failed = true;
+        status.textContent = 'You used too much solution! Experiment failed.';
+        document.getElementById('repeatBtn').style.display = 'inline-block';
+      }
+
+      if (pourDuration >= 2) {
+        completed = true;
+        status.textContent = 'Titration complete!';
+        showCalculation();
+        document.getElementById('repeatBtn').style.display = 'inline-block';
+      }
+    }
+
+    draw();
+    requestAnimationFrame(update);
+  }
+
+  function startTitration() {
+    document.getElementById('experimentMenu').style.display = 'none';
+    document.getElementById('titrationSection').style.display = 'block';
+    lastTime = null;
+    requestAnimationFrame(update);
+  }
+
+  function resetExperiment() {
+    flaskLevel = 80; buretteLevel = 100; barValue = 0;
+    pourDuration = 0; completed = false; failed = false;
+    status.textContent = '';
+    completionMessage.innerHTML = '';
+    completionMessage.style.display = 'none';
+    document.getElementById('repeatBtn').style.display = 'none';
+    lastTime = null;
+    requestAnimationFrame(update);
+  }
+
+  function returnToMenu() {
+    document.getElementById('titrationSection').style.display = 'none';
+    document.getElementById('experimentMenu').style.display = 'flex';
+  }
+
+  function toggleTitrationInfo() {
+    const info = document.getElementById('titrationInfo');
+    info.style.display = info.style.display === 'block'? 'none':'block';
+  }
+
+  function showCalculation() {
+    const volumeUsed = (100 - buretteLevel).toFixed(2);
+    const C1 = 0.1; // Known concentration of NaOH
+    const V1 = volumeUsed / 1000; // Convert mL to L
+    const V2 = acidVolume / 1000;
+
+    const C2 = (C1 * V1) / V2;
+
+    completionMessage.innerHTML = `
+      <strong>Congratulations!</strong> You've successfully completed the titration.<br><br>
+      <b>Known (C₁):</b> ${C1} M NaOH<br>
+      <b>Volume Used (V₁):</b> ${volumeUsed} mL<br>
+      <b>Acid Volume (V₂):</b> ${acidVolume} mL<br><br>
+      <b>Formula:</b> C₁V₁ = C₂V₂<br><br>
+      <b>Calculated HCl Concentration (C₂):</b> ${C2.toFixed(3)} M
+    `;
+    completionMessage.style.display = 'block';
+  }
 </script>
 </body>
 </html>
