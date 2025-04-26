@@ -142,6 +142,59 @@
       button { font-size: 14px; padding: 8px 20px; }
       model-viewer { height: 200px; }
     }
+        /* Add these new styles */
+    .glass-container {
+      position: relative;
+      margin: 20px auto;
+      width: 300px;
+      height: 400px;
+    }
+    
+    .burette {
+      position: absolute;
+      left: 50%;
+      width: 40px;
+      height: 300px;
+      background: linear-gradient(to right, #f0f0f0 0%, #ffffff 30%, #f0f0f0 100%);
+      border-radius: 8px;
+      transform: translateX(-50%);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .burette-tap {
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      background: #d0d0d0;
+      transform: translateX(-50%);
+      clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%);
+    }
+
+    .flask {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 120px;
+      height: 140px;
+      background: linear-gradient(to right, #f0f0f0 0%, #ffffff 30%, #f0f0f0 100%);
+      border-radius: 40px 40px 80px 80px;
+      transform: translateX(-50%);
+    }
+
+    .liquid {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: rgba(135, 206, 250, 0.6);
+      transition: height 0.3s ease;
+    }
+
+    .target-zone {
+      left: 35% !important;  /* Extended yellow zone */
+      width: 30% !important;
+    }
   </style>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
@@ -204,6 +257,19 @@
       <span class="pin">Flask: Contains HCl (Hydrochloric Acid) with indicator</span>
     </div>
   </div>
+    <div id="titrationSection" style="display:none;">
+    <h2>Titration Experiment</h2>
+    
+    <div class="glass-container">
+      <div class="burette">
+        <div class="liquid" id="buretteLiquid" style="height: 100%"></div>
+        <div class="burette-tap"></div>
+      </div>
+      
+      <div class="flask">
+        <div class="liquid" id="flaskLiquid" style="height: 30%"></div>
+      </div>
+    </div>
 
 <script>
   // Add floating symbols animation (modified for transparency)
@@ -266,24 +332,23 @@
   window.addEventListener('touchstart', () => { isPressing = true; });
   window.addEventListener('touchend', () => { isPressing = false; });
 
+  // Update draw function with new graphics
   function draw() {
-    ctx.clearRect(0, 0, titrationCanvas.width, titrationCanvas.height);
-    // Burette
-    ctx.fillStyle = '#555'; ctx.fillRect(180, 10, 40, 210);
-    ctx.fillStyle = '#f28b82'; let bh = (buretteLevel/100)*200;
-    ctx.fillRect(185, 15+(200-bh),30,bh);
-    ctx.strokeStyle='#000'; ctx.strokeRect(180,10,40,210);
-    ctx.fillStyle='#000'; ctx.fillText('Burette',170,8);
-    // Flask
-    ctx.beginPath(); ctx.moveTo(150,260); ctx.lineTo(170,300);
-    ctx.lineTo(230,300); ctx.lineTo(250,260);
-    ctx.quadraticCurveTo(200,250,150,260); ctx.stroke();
-    ctx.fillStyle = completed? '#7CFC00': failed? '#ff6961' : '#aecbfa';
-    let fh = (flaskLevel/100)*40;
-    ctx.beginPath(); ctx.moveTo(170,300); ctx.lineTo(230,300);
-    ctx.lineTo(230,300-fh); ctx.lineTo(170,300-fh);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle='#000'; ctx.fillText('Flask',190,290);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Update liquid levels
+    document.getElementById('buretteLiquid').style.height = `${buretteLevel}%`;
+    document.getElementById('flaskLiquid').style.height = `${flaskLevel}%`;
+    
+    // Add color change based on progress
+    const flaskLiquid = document.getElementById('flaskLiquid');
+    if(completed) {
+      flaskLiquid.style.background = 'rgba(50, 205, 50, 0.6)'; // Green when complete
+    } else if(failed) {
+      flaskLiquid.style.background = 'rgba(255, 99, 71, 0.6)'; // Red when failed
+    } else {
+      flaskLiquid.style.background = 'rgba(135, 206, 250, 0.6)'; // Blue default
+    }
   }
 
   function update(timestamp) {
